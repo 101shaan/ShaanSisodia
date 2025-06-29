@@ -1,4 +1,6 @@
 import { FileSystem } from './FileSystem';
+// @ts-ignore
+import asciiArt from './asciiart.txt?raw';
 
 interface CommandResult {
   output: Array<{ type: 'output' | 'error' | 'success'; text: string }>;
@@ -267,56 +269,10 @@ export class CommandProcessor {
   }
 
   private neofetch(): CommandResult {
-    // Custom, compact, retro terminal ASCII art
-    const ascii = [
-  '        _____                  ',
-  '       /\\   \\                ',
-  '      /::\\   \\               ',
-  '     /:::::\\   \\             ',
-  '    /:::::::\\   \\            ',
-  '   /:::/\\::::\\   \\          ',
-  '  /:::/__\\::::\\   \\         ',
-  '  \\:::\\   \\::::\\   \\      ',
-  '___\\:::\\   \\::::\\   \\     ',
-  '/\\  \\:::\\   \\::::\\   \\   ',
-  '/::\\  \\:::\\   \\:::\\____\\ ',
-  '\\:::\\  \\:::\\   \\:::/    / ',
-  ' \\:::\\  \\:::\\   \\/____/   ',
-  '  \\:::\\  \\:::\\   \\        ',
-  '   \\:::\\  \\:::\\____\\      ',
-  '    \\:::\\  /:::/    /        ',
-  '     \\:::\\/:::/    /         ',
-  '      \\::::::/    /           ',
-  '       \\::::/    /            ',
-  '        \\::/    /             ',
-  '         \\/____/              ',
-  '                               ',
-  '   S H A A N O S   2 . 1       ',
-  '                               ',
-];
-    const sysInfo = [
-      `User:      shaan@portfolio`,
-      `OS:        ShaanOS 2.1.0`,
-      `Host:      Portfolio Terminal`,
-      `Kernel:    6.5.0-shaan`,
-      `Uptime:    ${Math.floor(Math.random() * 100)} days`,
-      `Packages:  1337 (npm)`,
-      `Shell:     zsh 5.9`,
-      `CPU:       Intel i9-13900K (32) @ 3.0GHz`,
-      `GPU:       NVIDIA RTX 4090`,
-      `Memory:    ${Math.floor(Math.random() * 8000)}MiB / 32768MiB`,
-      `Theme:     Matrix [GTK3]`,
-      `Terminal:  ShaanOS Terminal`,
-    ];
-    // Merge ASCII and info side by side
-    const maxLines = Math.max(ascii.length, sysInfo.length);
-    const output = [];
-    for (let i = 0; i < maxLines; i++) {
-      const art = ascii[i] || ' '.repeat(36);
-      const info = sysInfo[i] ? '  ' + sysInfo[i] : '';
-      output.push({ type: 'success', text: art + info });
-    }
-    return { output };
+    // Just print the ASCII art file, line by line
+    return {
+      output: asciiArt.split('\n').map(line => ({ type: 'success', text: line }))
+    };
   }
 
   private portfolio(): CommandResult {
