@@ -43,7 +43,7 @@ export class FileSystem {
                   modified: new Date(),
                   content: `# Welcome to ShaanOS!
 
-This is the ultimate developer portfolio operating system.
+I hope you enjoy my portfolio / OS.
 
 ## Available Commands:
 - portfolio: Explore my projects
@@ -360,7 +360,7 @@ Prepare to die... in text form!`
               modified: new Date(),
               content: `Welcome to ShaanOS v2.1!
 
-This is the ultimate developer portfolio operating system.
+This is my portfolio operating system.
 Built with React, TypeScript, and pure determination.
 
 System Status: All systems operational

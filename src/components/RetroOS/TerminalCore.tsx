@@ -22,8 +22,8 @@ export const TerminalCore: React.FC<TerminalCoreProps> = ({
   const [input, setInput] = useState('');
   const [output, setOutput] = useState<Array<{ type: 'command' | 'output' | 'error' | 'success'; text: string }>>([
     { type: 'success', text: '╔══════════════════════════════════════════════════════════════╗' },
-    { type: 'success', text: '║                    Welcome to ShaanOS v2.1                  ║' },
-    { type: 'success', text: '║              The Ultimate Developer Portfolio OS             ║' },
+    { type: 'success', text: '║                    Welcome to ShaanOS v2.1                   ║' },
+    { type: 'success', text: '║                       The Portfolio OS                       ║' },
     { type: 'success', text: '╚══════════════════════════════════════════════════════════════╝' },
     { type: 'output', text: '' },
     { type: 'output', text: 'System Information:' },
