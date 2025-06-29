@@ -267,29 +267,56 @@ export class CommandProcessor {
   }
 
   private neofetch(): CommandResult {
-    return {
-      output: [
-        { type: 'success', text: '                   -`                    shaan@portfolio' },
-        { type: 'success', text: '                  .o+`                   ---------------' },
-        { type: 'success', text: '                 `ooo/                   OS: ShaanOS 2.1.0' },
-        { type: 'success', text: '                `+oooo:                  Host: Portfolio Terminal' },
-        { type: 'success', text: '               `+oooooo:                 Kernel: 6.5.0-shaan' },
-        { type: 'success', text: '               -+oooooo+:                Uptime: ' + Math.floor(Math.random() * 100) + ' days' },
-        { type: 'success', text: '             `/:-:++oooo+:               Packages: 1337 (npm)' },
-        { type: 'success', text: '            `/++++/+++++++:              Shell: zsh 5.9' },
-        { type: 'success', text: '           `/++++++++++++++:             Resolution: ∞x∞' },
-        { type: 'success', text: '          `/+++ooooooooooooo/`           DE: Terminal' },
-        { type: 'success', text: '         ./ooosssso++osssssso+`          WM: tmux' },
-        { type: 'success', text: '        .oossssso-````/ossssss+`         Theme: Matrix [GTK3]' },
-        { type: 'success', text: '       -osssssso.      :ssssssso.        Icons: Nerd Font' },
-        { type: 'success', text: '      :osssssss/        osssso+++.       Terminal: ShaanOS Terminal' },
-        { type: 'success', text: '     /ossssssss/        +ssssooo/-       CPU: Intel i9-13900K (32) @ 3.0GHz' },
-        { type: 'success', text: '   `/ossssso+/:-        -:/+osssso+-     GPU: NVIDIA RTX 4090' },
-        { type: 'success', text: '  `+sso+:-`                 `.-/+oso:    Memory: ' + Math.floor(Math.random() * 8000) + 'MiB / 32768MiB' },
-        { type: 'success', text: ' `++:.                           `-/+/   ' },
-        { type: 'success', text: ' .`                                 `/   ' }
-      ]
-    };
+    // Custom, compact, retro terminal ASCII art
+    const ascii = [
+  '        _____                  ',
+  '       /\\   \\                ',
+  '      /::\\   \\               ',
+  '     /:::::\\   \\             ',
+  '    /:::::::\\   \\            ',
+  '   /:::/\\::::\\   \\          ',
+  '  /:::/__\\::::\\   \\         ',
+  '  \\:::\\   \\::::\\   \\      ',
+  '___\\:::\\   \\::::\\   \\     ',
+  '/\\  \\:::\\   \\::::\\   \\   ',
+  '/::\\  \\:::\\   \\:::\\____\\ ',
+  '\\:::\\  \\:::\\   \\:::/    / ',
+  ' \\:::\\  \\:::\\   \\/____/   ',
+  '  \\:::\\  \\:::\\   \\        ',
+  '   \\:::\\  \\:::\\____\\      ',
+  '    \\:::\\  /:::/    /        ',
+  '     \\:::\\/:::/    /         ',
+  '      \\::::::/    /           ',
+  '       \\::::/    /            ',
+  '        \\::/    /             ',
+  '         \\/____/              ',
+  '                               ',
+  '   S H A A N O S   2 . 1       ',
+  '                               ',
+];
+    const sysInfo = [
+      `User:      shaan@portfolio`,
+      `OS:        ShaanOS 2.1.0`,
+      `Host:      Portfolio Terminal`,
+      `Kernel:    6.5.0-shaan`,
+      `Uptime:    ${Math.floor(Math.random() * 100)} days`,
+      `Packages:  1337 (npm)`,
+      `Shell:     zsh 5.9`,
+      `CPU:       Intel i9-13900K (32) @ 3.0GHz`,
+      `GPU:       NVIDIA RTX 4090`,
+      `Memory:    ${Math.floor(Math.random() * 8000)}MiB / 32768MiB`,
+      `Theme:     Matrix [GTK3]`,
+      `Terminal:  ShaanOS Terminal`,
+    ];
+    // Merge ASCII and info side by side
+    const maxLines = Math.max(ascii.length, sysInfo.length);
+    const output = [];
+    for (let i = 0; i < maxLines; i++) {
+      const art = ascii[i] || ' '.repeat(36);
+      const info = sysInfo[i] ? '  ' + sysInfo[i] : '';
+      output.push({ type: 'success', text: art + info });
+    }
+    return { output };
   }
 
   private portfolio(): CommandResult {
