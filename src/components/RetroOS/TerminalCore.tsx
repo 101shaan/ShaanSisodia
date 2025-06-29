@@ -48,14 +48,24 @@ export const TerminalCore: React.FC<TerminalCoreProps> = ({
   const fileSystem = useRef(new FileSystem());
   const commandProcessor = useRef(new CommandProcessor(fileSystem.current));
 
+  // Add initialization logging
+  useEffect(() => {
+    console.log("TerminalCore component initialized with theme:", theme);
+    return () => {
+      console.log("TerminalCore component unmounted");
+    };
+  }, [theme]);
+
   useEffect(() => {
     if (inputRef.current) {
+      console.log("Focusing input field");
       inputRef.current.focus();
     }
   }, []);
 
   useEffect(() => {
     if (outputRef.current) {
+      console.log("Scrolling to bottom of terminal output");
       outputRef.current.scrollTop = outputRef.current.scrollHeight;
     }
   }, [output]);
