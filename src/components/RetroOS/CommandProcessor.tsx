@@ -270,8 +270,21 @@ export class CommandProcessor {
 
   private neofetch(): CommandResult {
     // Just print the ASCII art file, line by line
+    const neofetchArt = String.raw`
+OS: ShaanOS 2.1.0                  
+Host: Portfolio Terminal         
+Kernel: 6.5.0-shaan                 
+Uptime: 42 days                     
+Packages: 1337 (npm)                
+Shell: zsh 5.9                      
+CPU: Intel i9-13900K (32) @ 3.0GHz
+GPU: NVIDIA RTX 4090
+Memory: 6847MiB / 32768MiB
+Theme: Matrix [GTK3]
+Terminal: ShaanOS Terminal
+`;
     return {
-      output: asciiArt.split('\n').map(line => ({ type: 'success', text: line }))
+      output: neofetchArt.split('\n').map(line => ({ type: 'success', text: line }))
     };
   }
 
