@@ -16,7 +16,6 @@ export const BootSequence: React.FC<BootSequenceProps> = ({
   const [output, setOutput] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
   const [bootComplete, setBootComplete] = useState(false);
-  const [bootStarted, setBootStarted] = useState(false);
 
   // Extended boot phases with LONGER durations
   const bootPhases = [
@@ -90,63 +89,100 @@ export const BootSequence: React.FC<BootSequenceProps> = ({
     }
   ];
 
+  // Debug logging
   useEffect(() => {
-    console.log("BootSequence component initialized");
+    console.log("Boot Sequence component mounted");
     return () => {
-      console.log("BootSequence component unmounted");
+      console.log("Boot Sequence component unmounted");
     };
   }, []);
 
+  // Start boot sequence immediately
   useEffect(() => {
-    if (!bootStarted) return;
+    console.log("Starting boot sequence immediately");
+    runBootSequence();
+  }, []);
+  
+  // Main boot sequence logic
+  const runBootSequence = () => {
+    console.log("Boot sequence initiated");
+    let timeoutId: NodeJS.Timeout | null = null;
+    let phaseIndex = 0;
     
-    console.log("Starting boot phase:", currentPhase);
-    let timeoutId: NodeJS.Timeout;
-    
-    const runPhase = (phaseIndex: number) => {
-      if (phaseIndex >= bootPhases.length) {
-        console.log("All boot phases complete, waiting for user to click BOOT INTO OS");
+    const processPhase = (index: number) => {
+      if (index >= bootPhases.length) {
+        console.log("All boot phases complete, waiting for user interaction");
         setBootComplete(true);
-        return; // No automatic continuation - must wait for user action
+        return;
       }
 
-      const phase = bootPhases[phaseIndex];
-      console.log(`Starting boot phase: ${phase.name}`);
+      const phase = bootPhases[index];
+      console.log(`Starting boot phase ${index}: ${phase.name}`);
+      setCurrentPhase(index);
+      
+      // Clear output at the start of each phase
       setOutput([]);
       
+      // Safety check that the phase exists
+      if (!phase || !phase.messages) {
+        console.error(`Phase ${index} is undefined or has no messages`);
+        return;
+      }
+      
       let messageIndex = 0;
-      const showMessage = () => {
-        if (messageIndex < phase.messages.length) {
-          setOutput(prev => [...prev, phase.messages[messageIndex]]);
-          messageIndex++;
-          
-          // Variable delay for realistic boot timing
-          const delay = phase.messages[messageIndex - 1] === '' ? 200 : 
-                       phase.messages[messageIndex - 1].includes('[') ? 300 :
-                       Math.random() * 400 + 200; // Slower display rate for longer animation
-          
-          timeoutId = setTimeout(showMessage, delay);
+      const showMessages = () => {
+        // Safety check to avoid undefined access
+        if (!phase || !phase.messages || messageIndex >= phase.messages.length) {
+          console.error("Invalid phase data or message index out of bounds");
+          return;
+        }
+        
+        // Get the message with safety check
+        const message = phase.messages[messageIndex];
+        if (message !== undefined) {
+          setOutput(prev => [...prev, message]);
         } else {
-          // Phase complete, move to next
-          console.log(`Boot phase ${phase.name} complete, moving to next phase`);
-          setProgress((phaseIndex + 1) / bootPhases.length * 100);
+          console.warn(`Message at index ${messageIndex} in phase ${index} is undefined`);
+        }
+        
+        messageIndex++;
+        
+        if (messageIndex < phase.messages.length) {
+          // Get the previous message safely
+          const prevMessage = messageIndex > 0 ? phase.messages[messageIndex - 1] : '';
+          
+          // Calculate delay with safety checks
+          const delay = !prevMessage ? 200 : 
+                        prevMessage.includes('[') ? 300 :
+                        Math.random() * 400 + 200; // Slower display for longer animation
+          
+          timeoutId = setTimeout(showMessages, delay);
+        } else {
+          // Phase complete, move to next phase
+          console.log(`Phase ${index} (${phase.name}) complete, progress: ${Math.round(((index + 1) / bootPhases.length) * 100)}%`);
+          setProgress(((index + 1) / bootPhases.length) * 100);
+          
           timeoutId = setTimeout(() => {
-            setCurrentPhase(phaseIndex + 1);
-            runPhase(phaseIndex + 1);
-          }, 1000); // Longer delay between phases
+            processPhase(index + 1);
+          }, 1200); // Longer delay between phases
         }
       };
-
-      showMessage();
+      
+      // Start showing messages for this phase
+      showMessages();
     };
-
-    runPhase(currentPhase);
     
+    // Begin with phase 0
+    processPhase(0);
+    
+    // Cleanup function
     return () => {
-      console.log("Cleaning up boot phase timeouts");
-      if (timeoutId) clearTimeout(timeoutId);
+      if (timeoutId) {
+        console.log("Cleaning up boot sequence timeouts");
+        clearTimeout(timeoutId);
+      }
     };
-  }, [currentPhase, bootStarted]);
+  };
 
   const getThemeColors = () => {
     switch (theme) {
@@ -163,12 +199,8 @@ export const BootSequence: React.FC<BootSequenceProps> = ({
 
   const colors = getThemeColors();
   
-  const handleStartBoot = () => {
-    setBootStarted(true);
-  };
-  
   const handleCompleteOS = () => {
-    console.log("User clicked BOOT INTO OS, transitioning to OS");
+    console.log("BOOT INTO OS button clicked, transitioning to terminal");
     onComplete();
   };
 
@@ -177,99 +209,94 @@ export const BootSequence: React.FC<BootSequenceProps> = ({
       className="w-full h-full flex flex-col justify-center items-center p-8"
       style={{ backgroundColor: colors.bg, color: colors.primary }}
     >
-      {!bootStarted ? (
-        // Initial boot screen
-        <div className="text-center">
-          <div className="text-5xl font-bold mb-8 animate-pulse">ShaanOS</div>
-          <div className="text-2xl mb-16">Version 2.1</div>
-          <button
-            className="px-10 py-5 text-2xl bg-gray-800 border-2 border-gray-600 rounded-lg hover:bg-gray-700 hover:border-gray-500 transition-all transform hover:scale-105"
-            style={{ color: colors.primary, borderColor: colors.secondary }}
-            onClick={handleStartBoot}
-          >
-            START BOOT SEQUENCE
-          </button>
+      {/* Boot Progress */}
+      <div className="w-full max-w-4xl mb-8">
+        <div className="flex justify-between text-sm mb-2">
+          <span>ShaanOS Boot Sequence - Phase: {bootPhases[Math.min(currentPhase, bootPhases.length-1)]?.name || 'Initializing'}</span>
+          <span>{Math.round(progress)}%</span>
         </div>
-      ) : (
-        <>
-          {/* Boot Progress */}
-          <div className="w-full max-w-4xl mb-8">
-            <div className="flex justify-between text-sm mb-2">
-              <span>ShaanOS Boot Sequence - Phase: {bootPhases[Math.min(currentPhase, bootPhases.length-1)]?.name}</span>
-              <span>{Math.round(progress)}%</span>
-            </div>
-            <div className="w-full bg-gray-800 rounded-full h-2">
-              <motion.div
-                className="h-2 rounded-full"
-                style={{ backgroundColor: colors.primary }}
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.5 }}
-              />
-            </div>
-          </div>
-
-          {/* Boot Output */}
-          <div className="w-full max-w-4xl h-[28rem] overflow-auto font-mono text-sm leading-relaxed px-4 py-2 bg-black bg-opacity-50 rounded border border-gray-800">
-            <div className="font-mono text-sm leading-relaxed">
-              {output.map((line, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.2 }}
-                  className={line.includes('✓') ? 'text-green-400' : 
-                            line.includes('[') && line.includes(']') ? 'text-blue-400' :
-                            line.includes('ERROR') ? 'text-red-400' :
-                            line.includes('**') ? 'text-yellow-400 font-bold' : ''}
-                >
-                  {line || '\u00A0'}
-                </motion.div>
-              ))}
-            </div>
-            
-            {/* Auto-scrolling effect */}
-            {output.length > 0 && (
-              <motion.div
-                className="h-8"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0 }}
-              />
-            )}
-          </div>
-
-          {/* CRT Effect */}
-          <div 
-            className="fixed inset-0 pointer-events-none opacity-20"
-            style={{
-              background: `repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                ${colors.primary} 2px,
-                ${colors.primary} 4px
-              )`
-            }}
+        <div className="w-full bg-gray-800 rounded-full h-2">
+          <motion.div
+            className="h-2 rounded-full"
+            style={{ backgroundColor: colors.primary }}
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.5 }}
           />
-          
-          {/* Boot button - only shown when all phases complete */}
-          {bootComplete && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: [0.9, 1.05, 1] }}
-              transition={{ duration: 1, type: "spring" }}
-              className="mt-8 px-10 py-4 text-xl bg-gray-800 border-2 border-gray-600 rounded-lg hover:bg-gray-700 transition-all transform hover:scale-105"
-              style={{ 
-                color: colors.primary,
-                borderColor: colors.secondary
-              }}
-              onClick={handleCompleteOS}
-            >
-              BOOT INTO OS
-            </motion.button>
-          )}
-        </>
+        </div>
+      </div>
+
+      {/* Boot Output */}
+      <div className="w-full max-w-4xl h-[28rem] overflow-auto font-mono text-sm leading-relaxed px-4 py-2 bg-black bg-opacity-50 rounded border border-gray-800">
+        <div className="font-mono text-sm leading-relaxed">
+          {output.map((line, index) => {
+            // Safety check for undefined line
+            if (line === undefined) return <div key={`undefined-${index}`}></div>;
+            
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+                className={
+                  line.includes && line.includes('✓') ? 'text-green-400' : 
+                  line.includes && line.includes('[') && line.includes(']') ? 'text-blue-400' :
+                  line.includes && line.includes('ERROR') ? 'text-red-400' :
+                  line.includes && line.includes('**') ? 'text-yellow-400 font-bold' : ''
+                }
+              >
+                {line || '\u00A0'}
+              </motion.div>
+            );
+          })}
+        </div>
+        
+        {/* Auto-scrolling effect */}
+        {output.length > 0 && (
+          <motion.div
+            className="h-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0 }}
+          />
+        )}
+      </div>
+
+      {/* CRT Effect */}
+      <div 
+        className="fixed inset-0 pointer-events-none opacity-20"
+        style={{
+          background: `repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            ${colors.primary} 2px,
+            ${colors.primary} 4px
+          )`
+        }}
+      />
+      
+      {/* Boot button - only shown when all phases complete */}
+      {bootComplete && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: [0.9, 1.05, 1] }}
+          transition={{ duration: 1, type: "spring" }}
+          className="mt-8 px-10 py-4 text-xl bg-gray-800 border-2 border-gray-600 rounded-lg hover:bg-gray-700 transition-all transform hover:scale-105"
+          style={{ 
+            color: colors.primary,
+            borderColor: colors.secondary
+          }}
+          onClick={handleCompleteOS}
+        >
+          BOOT INTO OS
+        </motion.button>
       )}
+      
+      {/* Debug info in development */}
+      <div className="fixed bottom-0 left-0 text-xs p-2 bg-black bg-opacity-75 text-gray-400">
+        Phase: {currentPhase} | Progress: {Math.round(progress)}% | Complete: {bootComplete ? 'Yes' : 'No'}
+      </div>
     </div>
   );
 };

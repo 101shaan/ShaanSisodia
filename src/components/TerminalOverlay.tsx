@@ -74,17 +74,33 @@ const TerminalOverlay: React.FC = () => {
     }
   }, [output]);
 
+  // Improved boot sequence activation
   const bootIntoRetroOS = () => {
-    // Show minimal messages
     setOutput(prev => [...prev,
       { type: 'command', text: '$ hack' },
-      { type: 'output', text: 'INITIATING SYSTEM BREACH...' },
-      { type: 'output', text: 'ACTIVATING RETRO OS...' },
+      { type: 'output', text: '🔒 INITIATING SYSTEM BREACH...' },
+      { type: 'output', text: '🔓 ACCESS GRANTED' },
+      { type: 'output', text: '🚀 LAUNCHING RETRO OS...' },
     ]);
     
-    // Immediately show RetroOS - no delays or transitions
-    setShowRetroOS(true);
-    setIsOpen(false);
+    // Close this overlay and activate RetroOS immediately to avoid timing issues
+    console.log("bootIntoRetroOS called, activating RetroOS and closing overlay");
+    
+    // Wait a moment to show the messages before transitioning
+    setTimeout(() => {
+      setShowRetroOS(true);  // Set this first
+      setIsOpen(false);      // Then close the overlay
+      setIsBooting(false);   // Reset booting state
+      
+      console.log("RetroOS activated:", {showRetroOS: true, isOpen: false});
+    }, 1500);
+  };
+
+  // Handle RetroOS exit
+  const handleRetroOSExit = () => {
+    console.log("RetroOS exited");
+    setShowRetroOS(false);
+    // Don't reopen terminal overlay
   };
 
   const executeCommand = (cmd: string) => {
@@ -220,11 +236,7 @@ const TerminalOverlay: React.FC = () => {
     return (
       <RetroOS 
         isActive={true} 
-        onExit={() => {
-          console.log("RetroOS exit triggered");
-          setShowRetroOS(false);
-          setIsOpen(false);
-        }} 
+        onExit={handleRetroOSExit} 
       />
     );
   }
