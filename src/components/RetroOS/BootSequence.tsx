@@ -32,7 +32,7 @@ export const BootSequence: React.FC<BootSequenceProps> = ({
         '',
         'All systems nominal. Initializing bootloader...'
       ],
-      duration: 2000
+      duration: 3000
     },
     {
       name: 'BOOTLOADER',
@@ -50,7 +50,7 @@ export const BootSequence: React.FC<BootSequenceProps> = ({
         '',
         'Kernel loaded successfully!'
       ],
-      duration: 3000
+      duration: 4000
     },
     {
       name: 'KERNEL',
@@ -73,7 +73,7 @@ export const BootSequence: React.FC<BootSequenceProps> = ({
         '',
         'System ready. Starting terminal interface...'
       ],
-      duration: 4000
+      duration: 5000
     }
   ];
 
@@ -92,11 +92,17 @@ export const BootSequence: React.FC<BootSequenceProps> = ({
     const runPhase = (phaseIndex: number) => {
       if (phaseIndex >= bootPhases.length) {
         console.log("All boot phases complete, transitioning to terminal...");
-        // Ensure onComplete is actually called
+        // Ensure onComplete is actually called after a deliberate delay
         setTimeout(() => {
           console.log("Calling onComplete handler now");
           onComplete();
-        }, 1000);
+          
+          // Double-check with an extra call as a fallback
+          setTimeout(() => {
+            console.log("Fallback: Calling onComplete handler again");
+            onComplete();
+          }, 1000);
+        }, 2000); // Increased delay for better visibility
         return;
       }
 
