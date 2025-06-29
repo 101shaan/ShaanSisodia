@@ -75,37 +75,16 @@ const TerminalOverlay: React.FC = () => {
   }, [output]);
 
   const bootIntoRetroOS = () => {
-    setIsBooting(true);
+    // Show minimal messages
     setOutput(prev => [...prev,
-      { type: 'command', text: '$ hack --init-retro-os' },
-      { type: 'output', text: '' },
+      { type: 'command', text: '$ hack' },
       { type: 'output', text: 'INITIATING SYSTEM BREACH...' },
-      { type: 'output', text: 'Bypassing security protocols...' },
-      { type: 'output', text: 'Accessing core systems...' },
-      { type: 'output', text: '' },
-      { type: 'error', text: 'WARNING: UNAUTHORIZED ACCESS DETECTED' },
-      { type: 'error', text: 'SYSTEM INTEGRITY COMPROMISED' },
-      { type: 'output', text: '' },
-      { type: 'output', text: 'Loading ShaanOS v2.1...' },
-      { type: 'output', text: 'Booting into retro terminal interface...' },
-      { type: 'output', text: '' },
-      { type: 'output', text: 'BOOT SEQUENCE INITIATED' },
-      { type: 'output', text: 'This will take a few seconds...' },
-      { type: 'output', text: '🚀 RETRO OS BOOT COMING SOON...' },
-      { type: 'output', text: 'This will be the most insane terminal OS ever built!' }
+      { type: 'output', text: 'ACTIVATING RETRO OS...' },
     ]);
-
-    // No debug logging
-    setTimeout(() => {
-      // Close terminal overlay first, then activate RetroOS
-      setIsOpen(false);
-      
-      // Slight delay before showing RetroOS
-      setTimeout(() => {
-        setShowRetroOS(true);
-        setIsBooting(false);
-      }, 100);
-    }, 3000);
+    
+    // Immediately show RetroOS - no delays or transitions
+    setShowRetroOS(true);
+    setIsOpen(false);
   };
 
   const executeCommand = (cmd: string) => {
