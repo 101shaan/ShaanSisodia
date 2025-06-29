@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 interface BootSequenceProps {
   onComplete: () => void;
@@ -11,104 +12,264 @@ export const BootSequence: React.FC<BootSequenceProps> = ({
   theme, 
   soundEnabled 
 }) => {
+  const [currentPhase, setCurrentPhase] = useState(0);
+  const [output, setOutput] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
-  const [messages, setMessages] = useState<string[]>([]);
+  const [bootComplete, setBootComplete] = useState(false);
+  const [bootStarted, setBootStarted] = useState(false);
 
-  // Boot sequence with fixed reliable timing
+  // Extended boot phases with LONGER durations
+  const bootPhases = [
+    {
+      name: 'BIOS',
+      messages: [
+        'ShaanOS BIOS v2.1.0',
+        'Copyright (C) 2024 Shaan Sisodia',
+        '',
+        'Performing POST (Power-On Self Test)...',
+        'CPU: Intel Core i9-13900K @ 3.0GHz ✓',
+        'Memory: 32768MB DDR5-5600 ✓',
+        'GPU: NVIDIA RTX 4090 24GB ✓',
+        'Storage: 2TB NVMe SSD ✓',
+        'Network: Gigabit Ethernet ✓',
+        '',
+        'All systems nominal. Initializing bootloader...'
+      ],
+      duration: 4500  // Longer duration
+    },
+    {
+      name: 'BOOTLOADER',
+      messages: [
+        'ShaanOS Bootloader v2.1',
+        '========================',
+        '',
+        'Loading kernel modules...',
+        '[████████████████████████████████] 100%',
+        '',
+        'Initializing memory management...',
+        'Setting up virtual memory...',
+        'Loading device drivers...',
+        'Mounting file systems...',
+        'Detecting hardware...',
+        'Running pre-boot scripts...',
+        '',
+        'Kernel loaded successfully!'
+      ],
+      duration: 6000  // Longer duration
+    },
+    {
+      name: 'KERNEL',
+      messages: [
+        'ShaanOS Kernel v2.1.0 starting...',
+        '',
+        '[    0.000000] Linux version 6.5.0-shaan',
+        '[    0.001234] Command line: root=/dev/sda1 ro quiet splash',
+        '[    0.002456] x86/fpu: Supporting XSAVE feature 0x001: \'x87 floating point registers\'',
+        '[    0.003678] x86/fpu: Supporting XSAVE feature 0x002: \'SSE registers\'',
+        '[    0.004890] x86/fpu: Supporting XSAVE feature 0x004: \'AVX registers\'',
+        '[    0.006123] Memory: 32GB available',
+        '[    0.007345] CPU: 16 cores, 32 threads detected',
+        '[    0.008567] PCI: Using configuration type 1 for base access',
+        '[    0.009789] Setting up interrupt handlers...',
+        '[    0.011012] Initializing network subsystem...',
+        '[    0.012234] Loading portfolio data...',
+        '[    0.013456] Mounting /home/shaan...',
+        '[    0.014678] Starting system services...',
+        '[    0.015890] Setting display resolution...',
+        '[    0.017012] Loading user preferences...',
+        '[    0.018234] Initializing security modules...',
+        '',
+        'System ready!',
+        '',
+        '==========================================',
+        '      ** BOOT SEQUENCE COMPLETE **',
+        ' CLICK "BOOT INTO OS" TO START THE SYSTEM',
+        '==========================================',
+      ],
+      duration: 8000  // Longer duration
+    }
+  ];
+
   useEffect(() => {
-    console.log("Boot sequence starting");
+    console.log("BootSequence component initialized");
+    return () => {
+      console.log("BootSequence component unmounted");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!bootStarted) return;
     
-    // Display messages in sequence with fixed timing
-    const bootMessages = [
-      "ShaanOS BIOS v2.1.0",
-      "Copyright (C) 2024 Shaan Sisodia",
-      "Performing POST...",
-      "CPU: Intel Core i9-13900K @ 3.0GHz ✓",
-      "Memory: 32768MB DDR5-5600 ✓",
-      "Storage: 2TB NVMe SSD ✓",
-      "All systems nominal.",
-      "Loading kernel modules...",
-      "Setting up virtual memory...",
-      "Mounting file systems...",
-      "ShaanOS Kernel v2.1.0 starting...",
-      "System ready. Starting terminal..."
-    ];
+    console.log("Starting boot phase:", currentPhase);
+    let timeoutId: NodeJS.Timeout;
     
-    let index = 0;
-    const totalMessages = bootMessages.length;
-    const interval = setInterval(() => {
-      if (index < totalMessages) {
-        setMessages(prev => [...prev, bootMessages[index]]);
-        setProgress((index + 1) / totalMessages * 100);
-        index++;
-      } else {
-        clearInterval(interval);
-        console.log("Boot sequence complete, calling onComplete");
-        setTimeout(() => onComplete(), 1000); // Final delay before terminal
+    const runPhase = (phaseIndex: number) => {
+      if (phaseIndex >= bootPhases.length) {
+        console.log("All boot phases complete, waiting for user to click BOOT INTO OS");
+        setBootComplete(true);
+        return; // No automatic continuation - must wait for user action
       }
-    }, 400); // Fixed interval between messages
+
+      const phase = bootPhases[phaseIndex];
+      console.log(`Starting boot phase: ${phase.name}`);
+      setOutput([]);
+      
+      let messageIndex = 0;
+      const showMessage = () => {
+        if (messageIndex < phase.messages.length) {
+          setOutput(prev => [...prev, phase.messages[messageIndex]]);
+          messageIndex++;
+          
+          // Variable delay for realistic boot timing
+          const delay = phase.messages[messageIndex - 1] === '' ? 200 : 
+                       phase.messages[messageIndex - 1].includes('[') ? 300 :
+                       Math.random() * 400 + 200; // Slower display rate for longer animation
+          
+          timeoutId = setTimeout(showMessage, delay);
+        } else {
+          // Phase complete, move to next
+          console.log(`Boot phase ${phase.name} complete, moving to next phase`);
+          setProgress((phaseIndex + 1) / bootPhases.length * 100);
+          timeoutId = setTimeout(() => {
+            setCurrentPhase(phaseIndex + 1);
+            runPhase(phaseIndex + 1);
+          }, 1000); // Longer delay between phases
+        }
+      };
+
+      showMessage();
+    };
+
+    runPhase(currentPhase);
     
     return () => {
-      clearInterval(interval);
-      console.log("Boot sequence cleanup");
+      console.log("Cleaning up boot phase timeouts");
+      if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [onComplete]);
-  
-  // Color based on theme
-  const getColor = () => {
+  }, [currentPhase, bootStarted]);
+
+  const getThemeColors = () => {
     switch (theme) {
-      case 'amber': return '#ffb000';
-      case 'cyan': return '#00ffff';
-      default: return '#00ff41';
+      case 'matrix':
+        return { primary: '#00ff41', bg: '#000000', secondary: '#008f11' };
+      case 'amber':
+        return { primary: '#ffb000', bg: '#1a0f00', secondary: '#cc8800' };
+      case 'cyan':
+        return { primary: '#00ffff', bg: '#001a1a', secondary: '#00cccc' };
+      default:
+        return { primary: '#00ff41', bg: '#000000', secondary: '#008f11' };
     }
   };
+
+  const colors = getThemeColors();
   
-  const color = getColor();
+  const handleStartBoot = () => {
+    setBootStarted(true);
+  };
+  
+  const handleCompleteOS = () => {
+    console.log("User clicked BOOT INTO OS, transitioning to OS");
+    onComplete();
+  };
 
   return (
     <div 
-      className="w-full h-full flex flex-col justify-center items-center p-8 bg-black"
-      onClick={() => onComplete()}
+      className="w-full h-full flex flex-col justify-center items-center p-8"
+      style={{ backgroundColor: colors.bg, color: colors.primary }}
     >
-      {/* Click anywhere to skip */}
-      <div className="text-sm mb-8 text-gray-500">Click anywhere to skip</div>
-      
-      {/* Boot Progress */}
-      <div className="w-full max-w-4xl mb-8">
-        <div className="flex justify-between text-sm mb-2">
-          <span style={{ color }}>ShaanOS Boot Sequence</span>
-          <span style={{ color }}>{Math.round(progress)}%</span>
+      {!bootStarted ? (
+        // Initial boot screen
+        <div className="text-center">
+          <div className="text-5xl font-bold mb-8 animate-pulse">ShaanOS</div>
+          <div className="text-2xl mb-16">Version 2.1</div>
+          <button
+            className="px-10 py-5 text-2xl bg-gray-800 border-2 border-gray-600 rounded-lg hover:bg-gray-700 hover:border-gray-500 transition-all transform hover:scale-105"
+            style={{ color: colors.primary, borderColor: colors.secondary }}
+            onClick={handleStartBoot}
+          >
+            START BOOT SEQUENCE
+          </button>
         </div>
-        <div className="w-full bg-gray-800 rounded-full h-2">
-          <div
-            className="h-2 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%`, backgroundColor: color }}
-          />
-        </div>
-      </div>
-
-      {/* Boot Output */}
-      <div className="w-full max-w-4xl h-96 overflow-hidden">
-        <div className="font-mono text-sm leading-relaxed">
-          {messages.map((line, index) => (
-            <div
-              key={index}
-              className={line.includes('✓') ? 'text-green-400' : ''}
-              style={{ color: line.includes('✓') ? '#00ff80' : color }}
-            >
-              {line || '\u00A0'}
+      ) : (
+        <>
+          {/* Boot Progress */}
+          <div className="w-full max-w-4xl mb-8">
+            <div className="flex justify-between text-sm mb-2">
+              <span>ShaanOS Boot Sequence - Phase: {bootPhases[Math.min(currentPhase, bootPhases.length-1)]?.name}</span>
+              <span>{Math.round(progress)}%</span>
             </div>
-          ))}
-        </div>
-      </div>
+            <div className="w-full bg-gray-800 rounded-full h-2">
+              <motion.div
+                className="h-2 rounded-full"
+                style={{ backgroundColor: colors.primary }}
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
+          </div>
 
-      {/* Skip button */}
-      <button
-        className="mt-8 px-4 py-2 bg-gray-800 text-gray-300 rounded hover:bg-gray-700"
-        onClick={() => onComplete()}
-      >
-        Skip Boot
-      </button>
+          {/* Boot Output */}
+          <div className="w-full max-w-4xl h-[28rem] overflow-auto font-mono text-sm leading-relaxed px-4 py-2 bg-black bg-opacity-50 rounded border border-gray-800">
+            <div className="font-mono text-sm leading-relaxed">
+              {output.map((line, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                  className={line.includes('✓') ? 'text-green-400' : 
+                            line.includes('[') && line.includes(']') ? 'text-blue-400' :
+                            line.includes('ERROR') ? 'text-red-400' :
+                            line.includes('**') ? 'text-yellow-400 font-bold' : ''}
+                >
+                  {line || '\u00A0'}
+                </motion.div>
+              ))}
+            </div>
+            
+            {/* Auto-scrolling effect */}
+            {output.length > 0 && (
+              <motion.div
+                className="h-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0 }}
+              />
+            )}
+          </div>
+
+          {/* CRT Effect */}
+          <div 
+            className="fixed inset-0 pointer-events-none opacity-20"
+            style={{
+              background: `repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                ${colors.primary} 2px,
+                ${colors.primary} 4px
+              )`
+            }}
+          />
+          
+          {/* Boot button - only shown when all phases complete */}
+          {bootComplete && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: [0.9, 1.05, 1] }}
+              transition={{ duration: 1, type: "spring" }}
+              className="mt-8 px-10 py-4 text-xl bg-gray-800 border-2 border-gray-600 rounded-lg hover:bg-gray-700 transition-all transform hover:scale-105"
+              style={{ 
+                color: colors.primary,
+                borderColor: colors.secondary
+              }}
+              onClick={handleCompleteOS}
+            >
+              BOOT INTO OS
+            </motion.button>
+          )}
+        </>
+      )}
     </div>
   );
 };

@@ -125,7 +125,7 @@ const TerminalOverlay: React.FC = () => {
           { type: 'output', text: '=================================' },
           { type: 'output', text: 'Age: 14 years old' },
           { type: 'output', text: 'Location: United Kingdom' },
-          { type: 'output', text: 'Passion: Building systems that scale' },
+          { type: 'output', text: 'Passion: Low-level systems' },
           { type: 'output', text: '' },
           { type: 'output', text: 'I architect solutions from the ground up,' },
           { type: 'output', text: 'whether it\'s operating systems in C/Assembly' },
@@ -193,7 +193,7 @@ const TerminalOverlay: React.FC = () => {
         setOutput(prev => [...prev,
           { type: 'error', text: `Command not found: ${command}` },
           { type: 'output', text: 'Type "help" for available commands.' },
-          { type: 'output', text: 'Or try "hack" to boot into ShaanOS! 🔥' },
+          { type: 'output', text: 'Or try "hack" to boot into ShaanOS!' },
           { type: 'output', text: '' }
         ]);
     }

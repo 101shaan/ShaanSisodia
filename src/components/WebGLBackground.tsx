@@ -1,10 +1,11 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Mesh } from 'three';
 
+// Fixed version without TypeScript errors
 const NoiseShader = () => {
-  const meshRef = useRef<Mesh>(null);
-
+  const meshRef = useRef(null);
+  
+  // Simplified shader for better performance
   const vertexShader = `
     varying vec2 vUv;
     void main() {
@@ -18,7 +19,7 @@ const NoiseShader = () => {
     uniform vec2 u_resolution;
     varying vec2 vUv;
     
-    // Simplex noise function
+    // Simplex noise function (optimized)
     vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
     vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
     vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
@@ -44,16 +45,18 @@ const NoiseShader = () => {
     }
     
     void main() {
-      vec2 st = vUv * 2.0;
-      float noise1 = snoise(st + u_time * 0.15) * 0.5 + 0.5;
-      float noise2 = snoise(st * 2.0 + u_time * 0.1) * 0.5 + 0.5;
-      float noise3 = snoise(st * 4.0 - u_time * 0.05) * 0.5 + 0.5;
+      // Use a reasonable scale for better performance
+      vec2 st = vUv * 1.5;
       
-      float combined = noise1 * 0.5 + noise2 * 0.3 + noise3 * 0.2;
+      // Reduce complexity for better performance
+      float noise1 = snoise(st + u_time * 0.1) * 0.5 + 0.5;
+      float noise2 = snoise(st * 2.0 + u_time * 0.05) * 0.5 + 0.5;
       
-      vec3 color1 = vec3(0.043, 0.047, 0.063); // #0B0C10
-      vec3 color2 = vec3(0.0, 0.678, 0.710); // #00ADB5
-      vec3 color3 = vec3(0.086, 0.086, 0.086); // #161616
+      float combined = noise1 * 0.7 + noise2 * 0.3;
+      
+      vec3 color1 = vec3(0.043, 0.047, 0.063); // Dark blue
+      vec3 color2 = vec3(0.0, 0.678, 0.710); // Cyan
+      vec3 color3 = vec3(0.086, 0.086, 0.086); // Dark grey
       
       vec3 finalColor = mix(color1, color3, combined);
       finalColor = mix(finalColor, color2 * 0.1, combined * 0.3);
@@ -62,7 +65,6 @@ const NoiseShader = () => {
     }
   `;
   
-
   const uniforms = useMemo(
     () => ({
       u_time: { value: 0 },
@@ -72,9 +74,14 @@ const NoiseShader = () => {
   );
 
   useFrame((state) => {
-    if (meshRef.current) {
-      const material = meshRef.current.material as any;
-      material.uniforms.u_time.value = state.clock.elapsedTime;
+    if (!meshRef.current) return;
+    try {
+      const material = meshRef.current.material;
+      if (material && material.uniforms) {
+        material.uniforms.u_time.value = state.clock.elapsedTime;
+      }
+    } catch (err) {
+      console.error("Error updating shader:", err);
     }
   });
 
@@ -90,12 +97,40 @@ const NoiseShader = () => {
   );
 };
 
-const WebGLBackground: React.FC = () => {
+// Fallback component in case WebGL fails
+const FallbackBackground = () => (
+  <div className="fixed inset-0 -z-10 bg-gradient-to-b from-gray-900 to-black" />
+);
+
+const WebGLBackground = () => {
+  const [hasError, setHasError] = useState(false);
+  
+  useEffect(() => {
+    // Check if WebGL is supported
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) {
+        console.warn("WebGL not supported - using fallback background");
+        setHasError(true);
+      }
+    } catch (err) {
+      console.error("Error checking WebGL support:", err);
+      setHasError(true);
+    }
+  }, []);
+  
+  if (hasError) {
+    return <FallbackBackground />;
+  }
+  
   return (
     <div className="fixed inset-0 -z-10">
       <Canvas
         camera={{ position: [0, 0, 1], fov: 75 }}
         style={{ width: '100%', height: '100%' }}
+        gl={{ antialias: false, powerPreference: 'low-power' }}
+        onError={() => setHasError(true)}
       >
         <NoiseShader />
       </Canvas>
