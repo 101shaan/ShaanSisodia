@@ -91,8 +91,8 @@ const TerminalOverlay: React.FC = () => {
       { type: 'output', text: '' },
       { type: 'output', text: 'BOOT SEQUENCE INITIATED' },
       { type: 'output', text: 'This will take a few seconds...' },
-      { type: 'output', text: '🚀 RETRO OS BOOT COMING SOON...' },
-      { type: 'output', text: 'This will be the most insane terminal OS ever built!' }
+      { type: 'output', text: 'Booting into ShaanOS...' },
+      { type: 'output', text: 'Loading Kernel...' }
     ]);
 
     // Ensure we're actually transitioning to RetroOS after the timeout
