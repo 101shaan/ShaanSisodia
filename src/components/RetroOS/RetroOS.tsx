@@ -17,6 +17,7 @@ export const RetroOS: React.FC<RetroOSProps> = ({ isActive, onExit }) => {
   const [currentTheme, setCurrentTheme] = useState('matrix');
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [terminalInitialized, setTerminalInitialized] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -32,6 +33,18 @@ export const RetroOS: React.FC<RetroOSProps> = ({ isActive, onExit }) => {
   useEffect(() => {
     console.log("RetroOS isActive changed:", isActive);
   }, [isActive]);
+
+  // Monitor boot state changes
+  useEffect(() => {
+    console.log("Boot complete state changed to:", bootComplete);
+    if (bootComplete) {
+      // Add a slight delay before initializing terminal
+      setTimeout(() => {
+        console.log("Initializing terminal after boot delay");
+        setTerminalInitialized(true);
+      }, 500);
+    }
+  }, [bootComplete]);
 
   useEffect(() => {
     if (isActive) {
@@ -81,7 +94,7 @@ export const RetroOS: React.FC<RetroOSProps> = ({ isActive, onExit }) => {
     return null;
   }
 
-  console.log("Rendering RetroOS with bootComplete:", bootComplete);
+  console.log("Rendering RetroOS with bootComplete:", bootComplete, "terminalInitialized:", terminalInitialized);
   
   return (
     <motion.div
@@ -109,7 +122,7 @@ export const RetroOS: React.FC<RetroOSProps> = ({ isActive, onExit }) => {
             theme={currentTheme}
             soundEnabled={soundEnabled}
           />
-        ) : (
+        ) : terminalInitialized ? (
           <TerminalCore
             key="terminal"
             theme={currentTheme}
@@ -118,6 +131,12 @@ export const RetroOS: React.FC<RetroOSProps> = ({ isActive, onExit }) => {
             onThemeChange={setCurrentTheme}
             onSoundToggle={setSoundEnabled}
           />
+        ) : (
+          <div className="flex items-center justify-center w-full h-full">
+            <div className="text-3xl font-bold" style={{color: currentTheme === 'matrix' ? '#00ff41' : currentTheme === 'amber' ? '#ffb000' : '#00ffff'}}>
+              Initializing Terminal...
+            </div>
+          </div>
         )}
       </AnimatePresence>
     </motion.div>
