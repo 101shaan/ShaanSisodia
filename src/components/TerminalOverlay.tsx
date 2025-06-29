@@ -91,20 +91,21 @@ const TerminalOverlay: React.FC = () => {
       { type: 'output', text: '' },
       { type: 'output', text: 'BOOT SEQUENCE INITIATED' },
       { type: 'output', text: 'This will take a few seconds...' },
-      { type: 'output', text: 'Booting into ShaanOS...' },
-      { type: 'output', text: 'Loading Kernel...' }
+      { type: 'output', text: '🚀 RETRO OS BOOT COMING SOON...' },
+      { type: 'output', text: 'This will be the most insane terminal OS ever built!' }
     ]);
 
-    // Ensure we're actually transitioning to RetroOS after the timeout
+    // No debug logging
     setTimeout(() => {
-      // These two lines are the key to transitioning to RetroOS
-      setShowRetroOS(true);
-      setIsBooting(false);
-      // We'll keep isOpen true initially to ensure smooth transition
-      setTimeout(() => setIsOpen(false), 100);
+      // Close terminal overlay first, then activate RetroOS
+      setIsOpen(false);
       
-      console.log("RetroOS should now be active:", { showRetroOS: true, isBooting: false });
-    }, 4000);
+      // Slight delay before showing RetroOS
+      setTimeout(() => {
+        setShowRetroOS(true);
+        setIsBooting(false);
+      }, 100);
+    }, 3000);
   };
 
   const executeCommand = (cmd: string) => {
