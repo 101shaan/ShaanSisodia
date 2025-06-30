@@ -1,4 +1,4 @@
-# ShaanSisodia Portfolio OS
+# ShaanSisodia Portfolio OS (unfinished)
 
 A next-level, interactive portfolio that fuses retro operating system vibes with modern web technology. Explore my projects, play retro games, and experience a terminal that feels alive—all in your browser.
 
