@@ -70,6 +70,18 @@ export class CommandProcessor {
       case 'invaders':
         context.onGameStart('invaders');
         return { output: [] };
+      case 'pong':
+        context.onGameStart('pong');
+        return { output: [] };
+      case 'breakout':
+        context.onGameStart('breakout');
+        return { output: [] };
+      case 'pacman':
+        context.onGameStart('pacman');
+        return { output: [] };
+      case 'chess':
+        context.onGameStart('chess');
+        return { output: [] };
       case 'theme':
         return this.theme(args, context);
       case 'sound':
@@ -147,6 +159,10 @@ export class CommandProcessor {
         { type: 'output', text: '  snake            - Play Snake' },
         { type: 'output', text: '  tetris           - Play Tetris' },
         { type: 'output', text: '  invaders         - Play Space Invaders' },
+        { type: 'output', text: '  pong             - Play Pong' },
+        { type: 'output', text: '  breakout         - Play Breakout' },
+        { type: 'output', text: '  pacman           - Play Pac-Man' },
+        { type: 'output', text: '  chess            - Play Chess' },
         { type: 'output', text: '' },
         { type: 'output', text: 'Customization:' },
         { type: 'output', text: '  theme <name>     - Change theme (matrix/amber/cyan)' },
@@ -271,17 +287,19 @@ export class CommandProcessor {
   private neofetch(): CommandResult {
     // Just print the ASCII art file, line by line
     const neofetchArt = String.raw`
-OS: ShaanOS 2.1.0                  
-Host: Portfolio Terminal         
-Kernel: 6.5.0-shaan                 
-Uptime: 42 days                     
-Packages: 1337 (npm)                
-Shell: zsh 5.9                      
-CPU: Intel i9-13900K (32) @ 3.0GHz
-GPU: NVIDIA RTX 4090
-Memory: 6847MiB / 32768MiB
-Theme: Matrix [GTK3]
-Terminal: ShaanOS Terminal
+ --------------------------------------
+|OS: ShaanOS 2.1.0                     |------------------
+|Host: Portfolio Terminal              |                 |
+|Kernel: 6.5.0-shaan                   |         ________|        
+|Uptime: 42 days                       |         |         
+|Packages: 1337 (npm)                  |         |         
+|Shell: zsh 5.9                        |         |_______     
+|CPU: Intel i9-13900K (32) @ 3.0GHz    |                 |
+|GPU: NVIDIA RTX 4090                  |                 |
+|Memory: 6847MiB / 32768MiB            |         ________|          |  
+|Theme: Matrix [GTK3]                  |                 |
+|Terminal: ShaanOS Terminal            |_________________|
+ -------------------------------------- 
 `;
     return {
       output: neofetchArt.split('\n').map(line => ({ type: 'success', text: line }))
@@ -330,12 +348,10 @@ Terminal: ShaanOS Terminal
         { type: 'output', text: '  snake     - Classic Snake game with smooth controls' },
         { type: 'output', text: '  tetris    - Full-featured Tetris with proper rotation' },
         { type: 'output', text: '  invaders  - Space Invaders with retro sound effects' },
-        { type: 'output', text: '' },
-        { type: 'output', text: 'Coming Soon:' },
-        { type: 'output', text: '  pong      - Two-player Pong' },
-        { type: 'output', text: '  breakout  - Ball and paddle game' },
-        { type: 'output', text: '  pacman    - Maze navigation game' },
-        { type: 'output', text: '  chess     - Full chess implementation' },
+        { type: 'output', text: '  pong      - Two-player Pong with classic physics' },
+        { type: 'output', text: '  breakout  - Ball and paddle brick-breaking game' },
+        { type: 'output', text: '  pacman    - Maze navigation with ghost AI' },
+        { type: 'output', text: '  chess     - Full chess with piece movement rules' },
         { type: 'output', text: '' },
         { type: 'output', text: 'Type the game name to start playing!' },
         { type: 'output', text: 'Press ESC during any game to return to terminal.' }
@@ -464,7 +480,7 @@ Terminal: ShaanOS Terminal
       return {
         output: [{ 
           type: 'output', 
-          text: 'ShaanOS portfolio 2.1.0-retro #1 SMP PREEMPT_DYNAMIC Mon Jan 1 00:00:00 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux' 
+          text: 'ShaanOS portfolio 2.1.0-retro #1 SMP PREEMPT_DYNAMIC Mon Jan 1 00:00:00 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux' 
         }]
       };
     }

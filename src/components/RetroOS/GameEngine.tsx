@@ -3,6 +3,10 @@ import { motion } from 'framer-motion';
 import { SnakeGame } from './games/SnakeGame';
 import { TetrisGame } from './games/TetrisGame';
 import { InvadersGame } from './games/InvadersGame';
+import { PongGame } from './games/PongGame';
+import { BreakoutGame } from './games/BreakoutGame';
+import { PacmanGame } from './games/PacmanGame';
+import { ChessGame } from './games/ChessGame';
 
 interface GameEngineProps {
   game: string;
@@ -128,6 +132,14 @@ export const GameEngine: React.FC<GameEngineProps> = ({ game, theme, onExit }) =
         return <TetrisGame theme={theme} onExit={onExit} />;
       case 'invaders':
         return <InvadersGame theme={theme} onExit={onExit} />;
+      case 'pong':
+        return <PongGame theme={theme} onExit={onExit} />;
+      case 'breakout':
+        return <BreakoutGame theme={theme} onExit={onExit} />;
+      case 'pacman':
+        return <PacmanGame theme={theme} onExit={onExit} />;
+      case 'chess':
+        return <ChessGame theme={theme} onExit={onExit} />;
       default:
         return (
           <div className="w-full h-full flex items-center justify-center">

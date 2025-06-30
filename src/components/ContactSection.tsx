@@ -33,7 +33,7 @@ const ContactSection: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false }}
+          viewport={{ once: true }}
           transition={{ duration: 0.8 }}
           className="text-center mb-20"
         >
@@ -54,7 +54,7 @@ const ContactSection: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false }}
+            viewport={{ once: true }}
             transition={{ duration: 0.8 }}
             className="space-y-8"
           >
@@ -76,7 +76,7 @@ const ContactSection: React.FC = () => {
                   rel="noopener noreferrer"
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: false }}
+                  viewport={{ once: true }}
                   transition={{ delay: index * 0.1, duration: 0.6 }}
                   whileHover={{ 
                     y: -8, 
@@ -140,7 +140,7 @@ const ContactSection: React.FC = () => {
             <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
-              viewport={{ once: false }}
+              viewport={{ once: true }}
               transition={{ delay: 0.5, duration: 0.8 }}
               className="mt-16 p-6 bg-gray-900/30 rounded-lg border border-gray-800 max-w-md mx-auto"
             >

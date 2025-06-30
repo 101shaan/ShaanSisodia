@@ -1,40 +1,19 @@
 shaan@portfolio                 
-----------------                 
-OS: ShaanOS 2.1.0                
-Host: Portfolio Terminal          
-Kernel: 6.5.0-shaan                            
-Uptime: 42 days                                 
-Packages: 1337 (npm)                           
-Shell: zsh 5.9                    
-CPU: Intel i9-13900K (32) @ 3.0GHz
-GPU: NVIDIA RTX 4090
-Memory: 6847MiB / 32768MiB
-Theme: Matrix [GTK3]
-Terminal: ShaanOS Terminal
+----------------                                   S H A A N O S   2 . 1
+OS: ShaanOS 2.1.0                                  S H A A N O S   2 . 1
+Host: Portfolio Terminal                           S H A A N O S   2 . 1
+Kernel: 6.5.0-shaan                                S H A A N O S   2 . 1
+Uptime: 0 days                                     S H A A N O S   2 . 1
+Packages: 1337 (npm)                               S H A A N O S   2 . 1
+Shell: zsh 5.9                                     S H A A N O S   2 . 1
+CPU: Ryzen 7 9800X3D 5.2 GHz                       S H A A N O S   2 . 1
+GPU: NVIDIA RTX 5090                               
+Memory: 6847MiB / 32768MiB                         
+Theme: Matrix [GTK3]                               
+Terminal: ShaanOS Terminal                         
 
-        _____           
-       /\\    \\          
-      /::\\    \\         
-     /::::\\    \\        
-    /::::::\\    \\       
-   /:::/\\:::\\    \\      
-  /:::/__\\:::\\    \\     
-  \\:::\\   \\:::\\    \\    
-___\\:::\\   \\:::\\    \\   
-/\\  \\:::\\   \\:::\\    \\  
-/::\\  \\:::\\   \\:::\\____\\
-\\:::\\  \\:::\\   \\::/    /
- \\:::\\  \\:::\\   \\/____/ 
-  \\:::\\  \\:::\\    \\      
-   \\:::\\  \\:::\\____\\     
-    \\:::\\  /:::/    /     
-     \\:::\/:::/    /      
-      \\::::::/    /       
-       \\::::/    /        
-        \\::/    /         
-         \\/____/          
 
-   S H A A N O S   2 . 1
+   
 
 
 

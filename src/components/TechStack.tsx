@@ -35,7 +35,7 @@ const TechStack: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false }}
+          viewport={{ once: true }}
           transition={{ duration: 0.8 }}
           className="text-center mb-20"
         >
@@ -57,7 +57,7 @@ const TechStack: React.FC = () => {
               key={category.title}
               initial={{ opacity: 0, x: categoryIndex === 0 ? -50 : 50 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: false }}
+              viewport={{ once: true }}
               transition={{ duration: 0.8, delay: categoryIndex * 0.2 }}
               className="space-y-8"
             >
@@ -72,7 +72,7 @@ const TechStack: React.FC = () => {
                     key={item.name}
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: false }}
+                    viewport={{ once: true }}
                     transition={{ 
                       delay: (categoryIndex * 0.2) + (index * 0.1), 
                       duration: 0.6,

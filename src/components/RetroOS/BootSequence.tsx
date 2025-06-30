@@ -23,7 +23,7 @@ export const BootSequence: React.FC<BootSequenceProps> = ({
       name: 'BIOS',
       messages: [
         'ShaanOS BIOS v2.1.0',
-        'Copyright (C) 2024 Shaan Sisodia',
+        'Copyright (C) 2025 Shaan Sisodia',
         '',
         'Performing POST (Power-On Self Test)...',
         'CPU: Intel Core i9-13900K @ 3.0GHz ✓',
