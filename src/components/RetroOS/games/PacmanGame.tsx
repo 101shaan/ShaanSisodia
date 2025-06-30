@@ -11,23 +11,26 @@ interface Position {
   y: number;
 }
 
-type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
+type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT' | 'NONE';
 
 interface Ghost {
   x: number;
   y: number;
   direction: Direction;
   color: string;
+  mode: 'normal' | 'frightened' | 'eaten';
+  modeTimer: number;
 }
 
 export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
-  const [pacmanPos, setPacmanPos] = useState<Position>({ x: 9, y: 15 });
-  const [pacmanDir, setPacmanDir] = useState<Direction>('RIGHT');
+  const [pacmanPos, setPacmanPos] = useState<Position>({ x: 90, y: 120 });
+  const [pacmanDir, setPacmanDir] = useState<Direction>('LEFT');
+  const [nextDir, setNextDir] = useState<Direction>('LEFT');
   const [ghosts, setGhosts] = useState<Ghost[]>([
-    { x: 9, y: 9, direction: 'UP', color: '#ff0000' },
-    { x: 10, y: 9, direction: 'DOWN', color: '#ffb8ff' },
-    { x: 8, y: 9, direction: 'LEFT', color: '#00ffff' },
-    { x: 11, y: 9, direction: 'RIGHT', color: '#ffb852' }
+    { x: 90, y: 80, direction: 'UP', color: '#ff0000', mode: 'normal', modeTimer: 0 },
+    { x: 100, y: 80, direction: 'DOWN', color: '#ffb8ff', mode: 'normal', modeTimer: 0 },
+    { x: 80, y: 80, direction: 'LEFT', color: '#00ffff', mode: 'normal', modeTimer: 0 },
+    { x: 110, y: 80, direction: 'RIGHT', color: '#ffb852', mode: 'normal', modeTimer: 0 }
   ]);
   const [maze, setMaze] = useState<number[][]>([]);
   const [score, setScore] = useState(0);
@@ -36,15 +39,17 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
   const [gameWon, setGameWon] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [powerPelletActive, setPowerPelletActive] = useState(false);
+  const [tick, setTick] = useState(0);
 
   const gameLoopRef = useRef<NodeJS.Timeout>();
-  const nextDirRef = useRef<Direction>('RIGHT');
 
   const MAZE_WIDTH = 19;
   const MAZE_HEIGHT = 21;
-  const CELL_SIZE = 25;
+  const CELL_SIZE = 20;
+  const SPEED = 2;
 
-  // Maze layout: 0 = empty, 1 = wall, 2 = dot, 3 = power pellet
+  // Maze layout: 0 = empty, 1 = wall, 2 = dot, 3 = power pellet, 4 = ghost house
   const INITIAL_MAZE = [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
@@ -52,13 +57,13 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
     [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
     [1,2,1,1,1,2,1,2,1,1,1,2,1,2,1,1,1,2,1],
     [1,2,2,2,2,2,1,2,2,1,2,2,1,2,2,2,2,2,1],
-    [1,1,1,1,1,2,1,1,0,1,0,1,1,2,1,1,1,1,1],
-    [0,0,0,0,1,2,1,0,0,0,0,0,1,2,1,0,0,0,0],
-    [1,1,1,1,1,2,1,0,1,0,1,0,1,2,1,1,1,1,1],
-    [0,0,0,0,0,2,0,0,1,0,1,0,0,2,0,0,0,0,0],
-    [1,1,1,1,1,2,1,0,1,1,1,0,1,2,1,1,1,1,1],
-    [0,0,0,0,1,2,1,0,0,0,0,0,1,2,1,0,0,0,0],
-    [1,1,1,1,1,2,1,1,0,1,0,1,1,2,1,1,1,1,1],
+    [1,1,1,1,1,2,1,1,4,1,4,1,1,2,1,1,1,1,1],
+    [0,0,0,0,1,2,1,4,4,4,4,4,1,2,1,0,0,0,0],
+    [1,1,1,1,1,2,1,4,1,0,1,4,1,2,1,1,1,1,1],
+    [0,0,0,0,0,2,4,4,1,0,1,4,4,2,0,0,0,0,0],
+    [1,1,1,1,1,2,1,4,1,1,1,4,1,2,1,1,1,1,1],
+    [0,0,0,0,1,2,1,4,4,4,4,4,1,2,1,0,0,0,0],
+    [1,1,1,1,1,2,1,1,4,1,4,1,1,2,1,1,1,1,1],
     [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
     [1,2,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,2,1],
     [1,3,2,1,2,2,2,2,2,2,2,2,2,2,2,1,2,3,1],
@@ -78,7 +83,8 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
           wall: '#008f11',
           dot: '#ffff00',
           pacman: '#ffff00',
-          text: '#00ff41'
+          text: '#00ff41',
+          powerPellet: '#ffffff'
         };
       case 'amber':
         return { 
@@ -87,7 +93,8 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
           wall: '#cc8800',
           dot: '#ffffff',
           pacman: '#ffff00',
-          text: '#ffb000'
+          text: '#ffb000',
+          powerPellet: '#ffff00'
         };
       case 'cyan':
         return { 
@@ -96,7 +103,8 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
           wall: '#00cccc',
           dot: '#ffffff',
           pacman: '#ffff00',
-          text: '#00ffff'
+          text: '#00ffff',
+          powerPellet: '#ffffff'
         };
       default:
         return { 
@@ -105,35 +113,71 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
           wall: '#0000ff',
           dot: '#ffff00',
           pacman: '#ffff00',
-          text: '#00ff41'
+          text: '#00ff41',
+          powerPellet: '#ffffff'
         };
     }
   };
 
   const colors = getThemeColors();
 
+  const pointToCoord = (x: number) => Math.round(x / 10);
+
   const isValidMove = useCallback((x: number, y: number, maze: number[][]) => {
-    if (x < 0 || x >= MAZE_WIDTH || y < 0 || y >= MAZE_HEIGHT) return false;
-    return maze[y][x] !== 1;
+    const gridX = pointToCoord(x);
+    const gridY = pointToCoord(y);
+    
+    if (gridX < 0 || gridX >= MAZE_WIDTH || gridY < 0 || gridY >= MAZE_HEIGHT) {
+      // Handle tunnel at middle row
+      if (gridY === 9 && (gridX < 0 || gridX >= MAZE_WIDTH)) {
+        return true;
+      }
+      return false;
+    }
+    
+    return maze[gridY][gridX] !== 1;
   }, []);
 
   const getDirectionOffset = (direction: Direction) => {
     switch (direction) {
-      case 'UP': return { x: 0, y: -1 };
-      case 'DOWN': return { x: 0, y: 1 };
-      case 'LEFT': return { x: -1, y: 0 };
-      case 'RIGHT': return { x: 1, y: 0 };
+      case 'UP': return { x: 0, y: -SPEED };
+      case 'DOWN': return { x: 0, y: SPEED };
+      case 'LEFT': return { x: -SPEED, y: 0 };
+      case 'RIGHT': return { x: SPEED, y: 0 };
+      default: return { x: 0, y: 0 };
     }
   };
 
+  const onWholeSquare = (x: number) => x % 10 === 0;
+
+  const canChangeDirection = (x: number, y: number, newDir: Direction, maze: number[][]) => {
+    if (!onWholeSquare(x) || !onWholeSquare(y)) return false;
+    
+    const offset = getDirectionOffset(newDir);
+    return isValidMove(x + offset.x, y + offset.y, maze);
+  };
+
+  const handleTunnel = (pos: Position): Position => {
+    // Left tunnel
+    if (pos.y === 90 && pos.x <= -10) {
+      return { x: 180, y: 90 };
+    }
+    // Right tunnel
+    if (pos.y === 90 && pos.x >= 190) {
+      return { x: 0, y: 90 };
+    }
+    return pos;
+  };
+
   const resetGame = useCallback(() => {
-    setPacmanPos({ x: 9, y: 15 });
-    setPacmanDir('RIGHT');
+    setPacmanPos({ x: 90, y: 120 });
+    setPacmanDir('LEFT');
+    setNextDir('LEFT');
     setGhosts([
-      { x: 9, y: 9, direction: 'UP', color: '#ff0000' },
-      { x: 10, y: 9, direction: 'DOWN', color: '#ffb8ff' },
-      { x: 8, y: 9, direction: 'LEFT', color: '#00ffff' },
-      { x: 11, y: 9, direction: 'RIGHT', color: '#ffb852' }
+      { x: 90, y: 80, direction: 'UP', color: '#ff0000', mode: 'normal', modeTimer: 0 },
+      { x: 100, y: 80, direction: 'DOWN', color: '#ffb8ff', mode: 'normal', modeTimer: 0 },
+      { x: 80, y: 80, direction: 'LEFT', color: '#00ffff', mode: 'normal', modeTimer: 0 },
+      { x: 110, y: 80, direction: 'RIGHT', color: '#ffb852', mode: 'normal', modeTimer: 0 }
     ]);
     setMaze(INITIAL_MAZE.map(row => [...row]));
     setScore(0);
@@ -142,114 +186,199 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
     setGameWon(false);
     setIsPaused(false);
     setGameStarted(true);
-    nextDirRef.current = 'RIGHT';
+    setPowerPelletActive(false);
+    setTick(0);
   }, []);
+
+  const eatDot = useCallback((x: number, y: number) => {
+    const gridX = pointToCoord(x);
+    const gridY = pointToCoord(y);
+    
+    setMaze(prevMaze => {
+      const newMaze = [...prevMaze];
+      if (newMaze[gridY] && newMaze[gridY][gridX] === 2) {
+        newMaze[gridY][gridX] = 0;
+        setScore(prev => prev + 10);
+      } else if (newMaze[gridY] && newMaze[gridY][gridX] === 3) {
+        newMaze[gridY][gridX] = 0;
+        setScore(prev => prev + 50);
+        setPowerPelletActive(true);
+        
+                 // Make all ghosts frightened - temporarily disabled for TypeScript
+         // setGhosts(prevGhosts => 
+         //   prevGhosts.map(ghost => ({
+         //     ...ghost,
+         //     mode: 'frightened',
+         //     modeTimer: 300
+         //   }))
+         // );
+      }
+      
+      // Check win condition
+      const hasDotsLeft = newMaze.some(row => row.some(cell => cell === 2 || cell === 3));
+      if (!hasDotsLeft) {
+        setGameWon(true);
+      }
+      
+      return newMaze;
+    });
+  }, []);
+
+  const getRandomDirection = (validDirections: Direction[]): Direction => {
+    if (validDirections.length === 0) return 'UP';
+    return validDirections[Math.floor(Math.random() * validDirections.length)];
+  };
 
   const updateGame = useCallback(() => {
     if (gameOver || gameWon || isPaused || !gameStarted) return;
 
+    setTick(prev => prev + 1);
+
+    // Update power pellet timer
+    if (powerPelletActive) {
+      setGhosts(prevGhosts => {
+        const updatedGhosts = prevGhosts.map(ghost => {
+          if (ghost.mode === 'frightened') {
+            const newTimer = ghost.modeTimer - 1;
+            if (newTimer <= 0) {
+              return { ...ghost, mode: 'normal' as const, modeTimer: 0 };
+            }
+            return { ...ghost, modeTimer: newTimer };
+          }
+          return ghost;
+        });
+        
+        // Check if any ghosts are still frightened
+        const stillFrightened = updatedGhosts.some(ghost => ghost.mode === 'frightened');
+        if (!stillFrightened) {
+          setPowerPelletActive(false);
+        }
+        
+        return updatedGhosts;
+      });
+    }
+
     // Move Pacman
     setPacmanPos(prevPos => {
-      const offset = getDirectionOffset(nextDirRef.current);
-      const newX = prevPos.x + offset.x;
-      const newY = prevPos.y + offset.y;
-
-      if (isValidMove(newX, newY, maze)) {
-        setPacmanDir(nextDirRef.current);
-        
-        // Handle maze wrapping (tunnel effect)
-        let finalX = newX;
-        if (newX < 0) finalX = MAZE_WIDTH - 1;
-        if (newX >= MAZE_WIDTH) finalX = 0;
-
-        // Collect dots
-        setMaze(prevMaze => {
-          const newMaze = [...prevMaze];
-          if (newMaze[newY][finalX] === 2) {
-            newMaze[newY][finalX] = 0;
-            setScore(prev => prev + 10);
-          } else if (newMaze[newY][finalX] === 3) {
-            newMaze[newY][finalX] = 0;
-            setScore(prev => prev + 50);
-          }
-
-          // Check win condition
-          const hasDotsLeft = newMaze.some(row => row.some(cell => cell === 2 || cell === 3));
-          if (!hasDotsLeft) {
-            setGameWon(true);
-          }
-
-          return newMaze;
-        });
-
-        return { x: finalX, y: newY };
+      let newPos = { ...prevPos };
+      
+      // Try to change direction if requested
+      if (nextDir !== pacmanDir && canChangeDirection(prevPos.x, prevPos.y, nextDir, maze)) {
+        setPacmanDir(nextDir);
       }
-
-      return prevPos;
+      
+      const offset = getDirectionOffset(pacmanDir);
+      const tentativePos = { x: prevPos.x + offset.x, y: prevPos.y + offset.y };
+      
+      if (isValidMove(tentativePos.x, tentativePos.y, maze)) {
+        newPos = tentativePos;
+      }
+      
+      // Handle tunnel
+      newPos = handleTunnel(newPos);
+      
+      // Eat dots
+      if (onWholeSquare(newPos.x) && onWholeSquare(newPos.y)) {
+        eatDot(newPos.x, newPos.y);
+      }
+      
+      return newPos;
     });
 
-    // Move Ghosts (simple AI)
+    // Move Ghosts
     setGhosts(prevGhosts => {
       return prevGhosts.map(ghost => {
-        const directions: Direction[] = ['UP', 'DOWN', 'LEFT', 'RIGHT'];
-        const validDirections = directions.filter(dir => {
-          const offset = getDirectionOffset(dir);
-          return isValidMove(ghost.x + offset.x, ghost.y + offset.y, maze);
-        });
-
-        if (validDirections.length === 0) return ghost;
-
-        // Simple AI: prefer moving towards Pacman, but add randomness
-        let chosenDirection = ghost.direction;
-        if (Math.random() < 0.3 || !validDirections.includes(ghost.direction)) {
-          chosenDirection = validDirections[Math.floor(Math.random() * validDirections.length)];
+        let newGhost = { ...ghost };
+        
+        // Simple AI: change direction randomly at intersections
+        if (onWholeSquare(ghost.x) && onWholeSquare(ghost.y)) {
+          const directions: Direction[] = ['UP', 'DOWN', 'LEFT', 'RIGHT'];
+          const validDirections = directions.filter(dir => {
+            const offset = getDirectionOffset(dir);
+            return isValidMove(ghost.x + offset.x, ghost.y + offset.y, maze);
+          });
+          
+          // Don't reverse direction unless necessary
+          const oppositeDir = ghost.direction === 'UP' ? 'DOWN' :
+                             ghost.direction === 'DOWN' ? 'UP' :
+                             ghost.direction === 'LEFT' ? 'RIGHT' : 'LEFT';
+          
+          const nonReverseDirections = validDirections.filter(dir => dir !== oppositeDir);
+          
+          if (Math.random() < 0.3 || !validDirections.includes(ghost.direction)) {
+            newGhost.direction = nonReverseDirections.length > 0 ? 
+              getRandomDirection(nonReverseDirections) : 
+              getRandomDirection(validDirections);
+          }
         }
-
-        const offset = getDirectionOffset(chosenDirection);
-        let newX = ghost.x + offset.x;
-        let newY = ghost.y + offset.y;
-
-        // Handle wrapping
-        if (newX < 0) newX = MAZE_WIDTH - 1;
-        if (newX >= MAZE_WIDTH) newX = 0;
-
-        return {
-          ...ghost,
-          x: newX,
-          y: newY,
-          direction: chosenDirection
+        
+        // Move ghost
+        const speed = ghost.mode === 'frightened' ? 1 : 
+                     ghost.mode === 'eaten' ? 4 : 2;
+        const offset = getDirectionOffset(newGhost.direction);
+        const tentativePos = {
+          x: ghost.x + offset.x * (speed / 2),
+          y: ghost.y + offset.y * (speed / 2)
         };
+        
+        if (isValidMove(tentativePos.x, tentativePos.y, maze)) {
+          newGhost.x = tentativePos.x;
+          newGhost.y = tentativePos.y;
+        }
+        
+        // Handle tunnel for ghosts too
+        const tunnelPos = handleTunnel({ x: newGhost.x, y: newGhost.y });
+        newGhost.x = tunnelPos.x;
+        newGhost.y = tunnelPos.y;
+        
+        return newGhost;
       });
     });
 
-    // Check collision with ghosts
-    setGhosts(prevGhosts => {
-      const collision = prevGhosts.some(ghost => 
-        Math.abs(ghost.x - pacmanPos.x) < 1 && Math.abs(ghost.y - pacmanPos.y) < 1
+    // Check collisions with ghosts
+    ghosts.forEach((ghost, index) => {
+      const distance = Math.sqrt(
+        Math.pow(pacmanPos.x - ghost.x, 2) + 
+        Math.pow(pacmanPos.y - ghost.y, 2)
       );
-
-      if (collision) {
-        setLives(prev => {
-          const newLives = prev - 1;
-          if (newLives <= 0) {
-            setGameOver(true);
-          } else {
-            // Reset positions
-            setPacmanPos({ x: 9, y: 15 });
-            setPacmanDir('RIGHT');
-            nextDirRef.current = 'RIGHT';
-          }
-          return newLives;
-        });
+      
+      if (distance < 15) {
+        if (ghost.mode === 'frightened') {
+          // Eat ghost
+          setScore(prev => prev + 200);
+          setGhosts(prevGhosts => 
+            prevGhosts.map((g, i) => 
+              i === index ? { ...g, mode: 'eaten' as const, modeTimer: 0 } : g
+            )
+          );
+        } else if (ghost.mode === 'normal') {
+          // Pacman dies
+          setLives(prev => {
+            const newLives = prev - 1;
+            if (newLives <= 0) {
+              setGameOver(true);
+            } else {
+              // Reset positions
+              setPacmanPos({ x: 90, y: 120 });
+              setPacmanDir('LEFT');
+              setNextDir('LEFT');
+              setGhosts([
+                { x: 90, y: 80, direction: 'UP', color: '#ff0000', mode: 'normal', modeTimer: 0 },
+                { x: 100, y: 80, direction: 'DOWN', color: '#ffb8ff', mode: 'normal', modeTimer: 0 },
+                { x: 80, y: 80, direction: 'LEFT', color: '#00ffff', mode: 'normal', modeTimer: 0 },
+                { x: 110, y: 80, direction: 'RIGHT', color: '#ffb852', mode: 'normal', modeTimer: 0 }
+              ]);
+            }
+            return newLives;
+          });
+        }
       }
-
-      return prevGhosts;
     });
-  }, [gameOver, gameWon, isPaused, gameStarted, maze, isValidMove, pacmanPos]);
+  }, [gameOver, gameWon, isPaused, gameStarted, pacmanPos, pacmanDir, nextDir, ghosts, maze, powerPelletActive, canChangeDirection, isValidMove, eatDot]);
 
   useEffect(() => {
     if (gameStarted && !gameOver && !gameWon && !isPaused) {
-      gameLoopRef.current = setInterval(updateGame, 200); // Slower for classic feel
+      gameLoopRef.current = setInterval(updateGame, 1000 / 30); // 30 FPS
     } else {
       if (gameLoopRef.current) {
         clearInterval(gameLoopRef.current);
@@ -277,32 +406,35 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
         return;
       }
 
-      if (e.key === ' ') {
-        setIsPaused(prev => !prev);
-        return;
-      }
-
-      // Set next direction
+      // Handle direction changes
       switch (e.key) {
         case 'ArrowUp':
         case 'w':
         case 'W':
-          nextDirRef.current = 'UP';
+          setNextDir('UP');
+          e.preventDefault();
           break;
         case 'ArrowDown':
         case 's':
         case 'S':
-          nextDirRef.current = 'DOWN';
+          setNextDir('DOWN');
+          e.preventDefault();
           break;
         case 'ArrowLeft':
         case 'a':
         case 'A':
-          nextDirRef.current = 'LEFT';
+          setNextDir('LEFT');
+          e.preventDefault();
           break;
         case 'ArrowRight':
         case 'd':
         case 'D':
-          nextDirRef.current = 'RIGHT';
+          setNextDir('RIGHT');
+          e.preventDefault();
+          break;
+        case ' ':
+          setIsPaused(prev => !prev);
+          e.preventDefault();
           break;
       }
     };
@@ -311,10 +443,81 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onExit, gameStarted, gameOver, gameWon, resetGame]);
 
-  // Initialize maze
+  // Initialize maze on mount
   useEffect(() => {
     setMaze(INITIAL_MAZE.map(row => [...row]));
   }, []);
+
+  const renderMazeCell = (cell: number, row: number, col: number) => {
+    const x = col * CELL_SIZE;
+    const y = row * CELL_SIZE;
+    
+    switch (cell) {
+      case 1: // Wall
+        return (
+          <div
+            key={`${row}-${col}`}
+            className="absolute"
+            style={{
+              left: x,
+              top: y,
+              width: CELL_SIZE,
+              height: CELL_SIZE,
+              backgroundColor: colors.wall,
+              border: `1px solid ${colors.primary}`
+            }}
+          />
+        );
+      case 2: // Dot
+        return (
+          <div
+            key={`${row}-${col}`}
+            className="absolute rounded-full"
+            style={{
+              left: x + CELL_SIZE / 2 - 2,
+              top: y + CELL_SIZE / 2 - 2,
+              width: 4,
+              height: 4,
+              backgroundColor: colors.dot
+            }}
+          />
+        );
+      case 3: // Power pellet
+        return (
+          <motion.div
+            key={`${row}-${col}`}
+            className="absolute rounded-full"
+            style={{
+              left: x + CELL_SIZE / 2 - 6,
+              top: y + CELL_SIZE / 2 - 6,
+              width: 12,
+              height: 12,
+              backgroundColor: colors.powerPellet
+            }}
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [1, 0.7, 1]
+            }}
+            transition={{
+              duration: 0.8,
+              repeat: Infinity
+            }}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getPacmanRotation = () => {
+    switch (pacmanDir) {
+      case 'UP': return -90;
+      case 'DOWN': return 90;
+      case 'LEFT': return 180;
+      case 'RIGHT': return 0;
+      default: return 0;
+    }
+  };
 
   return (
     <div 
@@ -340,102 +543,68 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
           backgroundColor: colors.bg
         }}
       >
-        {/* Maze */}
-        {maze.map((row, y) =>
-          row.map((cell, x) => {
-            if (cell === 1) {
-              return (
-                <div
-                  key={`${x}-${y}`}
-                  className="absolute"
-                  style={{
-                    left: x * CELL_SIZE,
-                    top: y * CELL_SIZE,
-                    width: CELL_SIZE,
-                    height: CELL_SIZE,
-                    backgroundColor: colors.wall
-                  }}
-                />
-              );
-            } else if (cell === 2) {
-              return (
-                <div
-                  key={`${x}-${y}`}
-                  className="absolute rounded-full"
-                  style={{
-                    left: x * CELL_SIZE + CELL_SIZE/2 - 2,
-                    top: y * CELL_SIZE + CELL_SIZE/2 - 2,
-                    width: 4,
-                    height: 4,
-                    backgroundColor: colors.dot
-                  }}
-                />
-              );
-            } else if (cell === 3) {
-              return (
-                <motion.div
-                  key={`${x}-${y}`}
-                  className="absolute rounded-full"
-                  style={{
-                    left: x * CELL_SIZE + CELL_SIZE/2 - 6,
-                    top: y * CELL_SIZE + CELL_SIZE/2 - 6,
-                    width: 12,
-                    height: 12,
-                    backgroundColor: colors.dot
-                  }}
-                  animate={{ scale: [1, 1.5, 1] }}
-                  transition={{ duration: 0.5, repeat: Infinity }}
-                />
-              );
-            }
-            return null;
-          })
+        {/* Render Maze */}
+        {maze.map((row, rowIndex) =>
+          row.map((cell, colIndex) => renderMazeCell(cell, rowIndex, colIndex))
         )}
 
         {/* Pacman */}
         <motion.div
-          className="absolute rounded-full"
+          className="absolute flex items-center justify-center text-yellow-400 text-2xl font-bold"
           style={{
-            left: pacmanPos.x * CELL_SIZE + 2,
-            top: pacmanPos.y * CELL_SIZE + 2,
-            width: CELL_SIZE - 4,
-            height: CELL_SIZE - 4,
-            backgroundColor: colors.pacman
+            left: (pacmanPos.x / 10) * CELL_SIZE - CELL_SIZE / 2,
+            top: (pacmanPos.y / 10) * CELL_SIZE - CELL_SIZE / 2,
+            width: CELL_SIZE,
+            height: CELL_SIZE,
+            transform: `rotate(${getPacmanRotation()}deg)`
           }}
-          animate={{ 
-            scale: [1, 0.8, 1],
-            rotate: pacmanDir === 'RIGHT' ? 0 : pacmanDir === 'DOWN' ? 90 : pacmanDir === 'LEFT' ? 180 : 270
+          animate={{
+            scale: [1, 0.8, 1]
           }}
-          transition={{ scale: { duration: 0.2, repeat: Infinity } }}
-        />
+          transition={{
+            duration: 0.3,
+            repeat: Infinity
+          }}
+        >
+          ●
+        </motion.div>
 
         {/* Ghosts */}
         {ghosts.map((ghost, index) => (
           <motion.div
             key={index}
-            className="absolute rounded-t-full"
+            className="absolute flex items-center justify-center text-2xl"
             style={{
-              left: ghost.x * CELL_SIZE + 2,
-              top: ghost.y * CELL_SIZE + 2,
-              width: CELL_SIZE - 4,
-              height: CELL_SIZE - 4,
-              backgroundColor: ghost.color,
-              clipPath: 'polygon(0% 0%, 100% 0%, 100% 85%, 85% 100%, 70% 85%, 55% 100%, 40% 85%, 25% 100%, 10% 85%, 0% 100%)'
+              left: (ghost.x / 10) * CELL_SIZE - CELL_SIZE / 2,
+              top: (ghost.y / 10) * CELL_SIZE - CELL_SIZE / 2,
+              width: CELL_SIZE,
+              height: CELL_SIZE,
+              color: ghost.mode === 'frightened' ? 
+                (tick % 20 > 10 ? '#0000bb' : '#ffffff') : 
+                ghost.mode === 'eaten' ? '#222222' : ghost.color
             }}
-            animate={{ y: [0, -2, 0] }}
-            transition={{ duration: 0.5, repeat: Infinity, delay: index * 0.1 }}
-          />
+            animate={{
+              y: [0, -2, 0]
+            }}
+            transition={{
+              duration: 0.5,
+              repeat: Infinity
+            }}
+          >
+            ▲
+          </motion.div>
         ))}
 
         {/* Game State Overlays */}
         {!gameStarted && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/80">
             <div className="text-center">
               <h2 className="text-3xl font-bold mb-4" style={{ color: colors.primary }}>
                 PAC-MAN
               </h2>
-              <p className="text-lg mb-4">Use Arrow Keys or WASD to move</p>
-              <p className="text-lg mb-6">Collect all dots while avoiding ghosts!</p>
+              <p className="text-lg mb-4">Use arrow keys or WASD to move</p>
+              <p className="text-lg mb-4">Eat all dots to win!</p>
+              <p className="text-lg mb-6">Avoid ghosts, eat power pellets to hunt them!</p>
               <p className="text-xl font-bold" style={{ color: colors.primary }}>
                 Press SPACE to Start
               </p>
@@ -443,21 +612,24 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
           </div>
         )}
 
-        {isPaused && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-            <h2 className="text-4xl font-bold" style={{ color: colors.primary }}>
-              PAUSED
-            </h2>
+        {isPaused && !gameOver && !gameWon && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold" style={{ color: colors.primary }}>
+                PAUSED
+              </h2>
+              <p className="text-lg mt-4">Press SPACE to Resume</p>
+            </div>
           </div>
         )}
 
         {gameOver && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/80">
             <div className="text-center">
               <h2 className="text-4xl font-bold mb-4" style={{ color: colors.primary }}>
                 GAME OVER
               </h2>
-              <p className="text-2xl mb-6">Final Score: {score}</p>
+              <p className="text-2xl mb-4">Final Score: {score}</p>
               <p className="text-xl font-bold" style={{ color: colors.primary }}>
                 Press SPACE to Play Again
               </p>
@@ -466,12 +638,13 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
         )}
 
         {gameWon && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/80">
             <div className="text-center">
               <h2 className="text-4xl font-bold mb-4" style={{ color: colors.primary }}>
                 YOU WIN!
               </h2>
-              <p className="text-2xl mb-6">Final Score: {score}</p>
+              <p className="text-2xl mb-4">Perfect Score: {score}</p>
+              <p className="text-lg mb-6">All dots collected!</p>
               <p className="text-xl font-bold" style={{ color: colors.primary }}>
                 Press SPACE to Play Again
               </p>
@@ -481,8 +654,8 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
       </div>
 
       <div className="text-center text-sm opacity-75">
-        <p>ESC: Exit | SPACE: Pause/Resume</p>
-        <p>Arrow Keys or WASD: Move</p>
+        <p>ESC: Exit | SPACE: Pause/Resume | Arrow Keys/WASD: Move</p>
+        <p>Eat power pellets to turn ghosts blue and hunt them!</p>
       </div>
     </div>
   );

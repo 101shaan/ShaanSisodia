@@ -31,7 +31,7 @@ interface Brick {
 export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => {
   const [paddleX, setPaddleX] = useState(350);
   const [ballPos, setBallPos] = useState<Position>({ x: 400, y: 500 });
-  const [ballVel, setBallVel] = useState<Velocity>({ x: 5, y: -5 });
+  const [ballVel, setBallVel] = useState<Velocity>({ x: 0, y: 0 });
   const [bricks, setBricks] = useState<Brick[]>([]);
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
@@ -40,6 +40,7 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
   const [gameWon, setGameWon] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [ballStuck, setBallStuck] = useState(true);
 
   const gameLoopRef = useRef<NodeJS.Timeout>();
   const keysRef = useRef<{ [key: string]: boolean }>({});
@@ -48,8 +49,9 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
   const GAME_HEIGHT = 600;
   const PADDLE_WIDTH = 100;
   const PADDLE_HEIGHT = 10;
-  const BALL_SIZE = 8;
+  const BALL_SIZE = 12;
   const PADDLE_SPEED = 8;
+  const BALL_SPEED = 6;
 
   const getThemeColors = () => {
     switch (theme) {
@@ -98,25 +100,26 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
 
   const colors = getThemeColors();
 
-  const createBricks = useCallback((_levelNum: number) => {
+  const createBricks = useCallback((levelNum: number) => {
     const newBricks: Brick[] = [];
-    const rows = 5;
+    const rows = Math.min(5 + Math.floor(levelNum / 2), 8);
     const cols = 10;
-    const brickWidth = GAME_WIDTH / cols;
-    const brickHeight = 20;
+    const brickWidth = (GAME_WIDTH - 20) / cols;
+    const brickHeight = 25;
     
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
+        const maxHits = Math.min(1 + Math.floor(row / 2) + Math.floor(levelNum / 3), 3);
         newBricks.push({
-          x: col * brickWidth,
-          y: 50 + row * brickHeight,
+          x: 10 + col * brickWidth,
+          y: 60 + row * (brickHeight + 2),
           width: brickWidth - 2,
-          height: brickHeight - 2,
+          height: brickHeight,
           destroyed: false,
-          hits: Math.floor(Math.random() * 3) + 1,
-          maxHits: 3,
+          hits: maxHits,
+          maxHits: maxHits,
           color: colors.bricks[row % colors.bricks.length],
-          points: (Math.floor(Math.random() * 3) + 1) * 10
+          points: maxHits * 10
         });
       }
     }
@@ -124,16 +127,23 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
     return newBricks;
   }, [colors.bricks]);
 
-  const resetBall = useCallback(() => {
-    setBallPos({ x: GAME_WIDTH / 2, y: GAME_HEIGHT - 100 });
-    setBallVel({ 
-      x: (Math.random() - 0.5) * 8, 
-      y: -Math.abs(Math.random() * 3 + 4)
+  const launchBall = useCallback(() => {
+    const angle = (Math.random() - 0.5) * Math.PI / 3; // Random angle between -30 and 30 degrees
+    setBallVel({
+      x: Math.sin(angle) * BALL_SPEED,
+      y: -Math.cos(angle) * BALL_SPEED
     });
+    setBallStuck(false);
+  }, []);
+
+  const resetBall = useCallback(() => {
+    setBallPos({ x: GAME_WIDTH / 2 - BALL_SIZE / 2, y: GAME_HEIGHT - 80 });
+    setBallVel({ x: 0, y: 0 });
+    setBallStuck(true);
   }, []);
 
   const resetGame = useCallback(() => {
-    setPaddleX(350);
+    setPaddleX(GAME_WIDTH / 2 - PADDLE_WIDTH / 2);
     setBricks(createBricks(1));
     setScore(0);
     setLives(3);
@@ -153,10 +163,17 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
     setTimeout(() => setIsPaused(false), 2000);
   }, [level, createBricks, resetBall]);
 
+  const checkCollision = useCallback((ballX: number, ballY: number, rectX: number, rectY: number, rectW: number, rectH: number) => {
+    return ballX < rectX + rectW &&
+           ballX + BALL_SIZE > rectX &&
+           ballY < rectY + rectH &&
+           ballY + BALL_SIZE > rectY;
+  }, []);
+
   const updateGame = useCallback(() => {
     if (gameOver || gameWon || isPaused || !gameStarted) return;
 
-    // Move paddle
+    // Handle paddle movement
     if (keysRef.current['ArrowLeft'] || keysRef.current['a'] || keysRef.current['A']) {
       setPaddleX(prev => Math.max(0, prev - PADDLE_SPEED));
     }
@@ -164,72 +181,80 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
       setPaddleX(prev => Math.min(GAME_WIDTH - PADDLE_WIDTH, prev + PADDLE_SPEED));
     }
 
+    // Move ball with paddle when stuck
+    if (ballStuck) {
+      setBallPos(prev => ({ ...prev, x: paddleX + PADDLE_WIDTH / 2 - BALL_SIZE / 2 }));
+      return;
+    }
+
     // Move ball
     setBallPos(prevPos => {
-      const newPos = {
-        x: prevPos.x + ballVel.x,
-        y: prevPos.y + ballVel.y
-      };
+      let newX = prevPos.x + ballVel.x;
+      let newY = prevPos.y + ballVel.y;
+      let newVelX = ballVel.x;
+      let newVelY = ballVel.y;
 
       // Ball collision with walls
-      if (newPos.x <= 0 || newPos.x >= GAME_WIDTH - BALL_SIZE) {
-        setBallVel(prev => ({ ...prev, x: -prev.x }));
-        newPos.x = newPos.x <= 0 ? 0 : GAME_WIDTH - BALL_SIZE;
+      if (newX <= 0) {
+        newX = 0;
+        newVelX = Math.abs(newVelX);
+      } else if (newX >= GAME_WIDTH - BALL_SIZE) {
+        newX = GAME_WIDTH - BALL_SIZE;
+        newVelX = -Math.abs(newVelX);
       }
 
-      if (newPos.y <= 0) {
-        setBallVel(prev => ({ ...prev, y: -prev.y }));
-        newPos.y = 0;
+      if (newY <= 0) {
+        newY = 0;
+        newVelY = Math.abs(newVelY);
       }
 
       // Ball collision with paddle
-      if (newPos.y + BALL_SIZE >= GAME_HEIGHT - PADDLE_HEIGHT - 20 &&
-          newPos.x + BALL_SIZE >= paddleX &&
-          newPos.x <= paddleX + PADDLE_WIDTH) {
-        
-        const hitPos = (newPos.x + BALL_SIZE/2 - paddleX) / PADDLE_WIDTH;
-        const angle = (hitPos - 0.5) * Math.PI / 3;
-        const speed = Math.sqrt(ballVel.x * ballVel.x + ballVel.y * ballVel.y);
-        
-        setBallVel({
-          x: Math.sin(angle) * speed,
-          y: -Math.abs(Math.cos(angle) * speed)
-        });
-        
-        newPos.y = GAME_HEIGHT - PADDLE_HEIGHT - 20 - BALL_SIZE;
+      const paddleY = GAME_HEIGHT - 30;
+      if (checkCollision(newX, newY, paddleX, paddleY, PADDLE_WIDTH, PADDLE_HEIGHT)) {
+        if (newY + BALL_SIZE > paddleY && prevPos.y + BALL_SIZE <= paddleY) {
+          // Hit from above
+          newY = paddleY - BALL_SIZE;
+          const hitPos = (newX + BALL_SIZE / 2 - paddleX) / PADDLE_WIDTH;
+          const bounceAngle = (hitPos - 0.5) * Math.PI / 3; // Max 60 degrees
+          const speed = Math.sqrt(newVelX * newVelX + newVelY * newVelY);
+          newVelX = Math.sin(bounceAngle) * speed;
+          newVelY = -Math.abs(Math.cos(bounceAngle) * speed);
+        }
       }
 
       // Ball collision with bricks
       setBricks(prevBricks => {
         const newBricks = [...prevBricks];
-
         for (let i = 0; i < newBricks.length; i++) {
           const brick = newBricks[i];
           if (brick.destroyed) continue;
 
-          if (newPos.x < brick.x + brick.width &&
-              newPos.x + BALL_SIZE > brick.x &&
-              newPos.y < brick.y + brick.height &&
-              newPos.y + BALL_SIZE > brick.y) {
-            
+          if (checkCollision(newX, newY, brick.x, brick.y, brick.width, brick.height)) {
             newBricks[i] = { ...brick, hits: brick.hits - 1 };
+            
             if (newBricks[i].hits <= 0) {
               newBricks[i].destroyed = true;
-              setScore(prev => prev + newBricks[i].points);
+              setScore(prev => prev + brick.points);
             }
 
-            const ballCenterX = newPos.x + BALL_SIZE / 2;
-            const ballCenterY = newPos.y + BALL_SIZE / 2;
+            // Determine bounce direction based on collision side
+            const ballCenterX = newX + BALL_SIZE / 2;
+            const ballCenterY = newY + BALL_SIZE / 2;
             const brickCenterX = brick.x + brick.width / 2;
             const brickCenterY = brick.y + brick.height / 2;
 
             const deltaX = ballCenterX - brickCenterX;
             const deltaY = ballCenterY - brickCenterY;
 
-            if (Math.abs(deltaX / brick.width) > Math.abs(deltaY / brick.height)) {
-              setBallVel(prev => ({ ...prev, x: -prev.x }));
+            const overlapX = (BALL_SIZE + brick.width) / 2 - Math.abs(deltaX);
+            const overlapY = (BALL_SIZE + brick.height) / 2 - Math.abs(deltaY);
+
+            if (overlapX < overlapY) {
+              // Horizontal collision
+              newVelX = deltaX > 0 ? Math.abs(newVelX) : -Math.abs(newVelX);
             } else {
-              setBallVel(prev => ({ ...prev, y: -prev.y }));
+              // Vertical collision
+              newVelY = deltaY > 0 ? Math.abs(newVelY) : -Math.abs(newVelY);
             }
 
             break;
@@ -244,8 +269,11 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
         return newBricks;
       });
 
+      // Update ball velocity
+      setBallVel({ x: newVelX, y: newVelY });
+
       // Ball falls below paddle
-      if (newPos.y > GAME_HEIGHT) {
+      if (newY > GAME_HEIGHT) {
         setLives(prev => {
           const newLives = prev - 1;
           if (newLives <= 0) {
@@ -255,12 +283,12 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
           }
           return newLives;
         });
-        return { x: GAME_WIDTH / 2, y: GAME_HEIGHT - 100 };
+        return prevPos;
       }
 
-      return newPos;
+      return { x: newX, y: newY };
     });
-  }, [gameOver, gameWon, isPaused, gameStarted, paddleX, ballVel, resetBall, nextLevel]);
+  }, [gameOver, gameWon, isPaused, gameStarted, paddleX, ballVel, ballStuck, checkCollision, resetBall, nextLevel]);
 
   useEffect(() => {
     if (gameStarted && !gameOver && !gameWon && !isPaused) {
@@ -295,7 +323,11 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
       }
 
       if (e.key === ' ') {
-        setIsPaused(prev => !prev);
+        if (ballStuck) {
+          launchBall();
+        } else {
+          setIsPaused(prev => !prev);
+        }
       }
     };
 
@@ -310,7 +342,7 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [onExit, gameStarted, gameOver, gameWon, resetGame]);
+  }, [onExit, gameStarted, gameOver, gameWon, resetGame, ballStuck, launchBall]);
 
   // Initialize bricks on mount
   useEffect(() => {
@@ -349,20 +381,23 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
           !brick.destroyed && (
             <motion.div
               key={index}
-              className="absolute"
+              className="absolute border"
               style={{
                 left: brick.x,
                 top: brick.y,
                 width: brick.width,
                 height: brick.height,
                 backgroundColor: brick.color,
-                opacity: 1 - (brick.hits / brick.maxHits) * 0.6
+                borderColor: colors.primary,
+                opacity: 0.7 + (brick.hits / brick.maxHits) * 0.3
               }}
               initial={{ scale: 1 }}
-              animate={brick.hits > 0 ? { 
-                scale: [1, 0.9, 1],
-                boxShadow: [`0 0 5px ${brick.color}`, `0 0 15px ${brick.color}`, `0 0 5px ${brick.color}`]
-              } : {}}
+              animate={{ 
+                scale: brick.hits < brick.maxHits ? [1, 0.95, 1] : 1,
+                boxShadow: brick.hits < brick.maxHits ? 
+                  [`0 0 5px ${brick.color}`, `0 0 15px ${brick.color}`, `0 0 5px ${brick.color}`] : 
+                  `0 0 5px ${brick.color}`
+              }}
               transition={{ duration: 0.2 }}
             />
           )
@@ -370,14 +405,15 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
 
         {/* Paddle */}
         <motion.div
-          className="absolute"
+          className="absolute border"
           style={{
             left: paddleX,
-            bottom: 20,
+            top: GAME_HEIGHT - 30,
             width: PADDLE_WIDTH,
             height: PADDLE_HEIGHT,
             backgroundColor: colors.paddle,
-            borderRadius: '8px'
+            borderColor: colors.primary,
+            borderRadius: '4px'
           }}
           animate={{ 
             boxShadow: [`0 0 5px ${colors.paddle}`, `0 0 15px ${colors.paddle}`, `0 0 5px ${colors.paddle}`]
@@ -387,13 +423,14 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
 
         {/* Ball */}
         <motion.div
-          className="absolute rounded-full"
+          className="absolute rounded-full border"
           style={{
             left: ballPos.x,
             top: ballPos.y,
             width: BALL_SIZE,
             height: BALL_SIZE,
-            backgroundColor: colors.ball
+            backgroundColor: colors.ball,
+            borderColor: colors.primary
           }}
           animate={{ 
             boxShadow: [`0 0 5px ${colors.ball}`, `0 0 15px ${colors.ball}`, `0 0 5px ${colors.ball}`]
@@ -409,11 +446,20 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
                 BREAKOUT
               </h2>
               <p className="text-lg mb-4">Use ← → or A/D to move paddle</p>
+              <p className="text-lg mb-4">Press SPACE to launch ball</p>
               <p className="text-lg mb-6">Break all bricks to advance!</p>
               <p className="text-xl font-bold" style={{ color: colors.primary }}>
                 Press SPACE to Start
               </p>
             </div>
+          </div>
+        )}
+
+        {ballStuck && gameStarted && !gameOver && !gameWon && (
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+            <p className="text-lg font-bold" style={{ color: colors.primary }}>
+              Press SPACE to Launch Ball
+            </p>
           </div>
         )}
 
@@ -457,8 +503,9 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
               <h2 className="text-4xl font-bold mb-4" style={{ color: colors.primary }}>
                 CONGRATULATIONS!
               </h2>
-              <p className="text-2xl mb-4">You Win!</p>
+              <p className="text-2xl mb-4">You Won!</p>
               <p className="text-lg mb-4">Final Score: {score}</p>
+              <p className="text-lg mb-6">Levels Completed: {level}</p>
               <p className="text-xl font-bold" style={{ color: colors.primary }}>
                 Press SPACE to Play Again
               </p>
@@ -467,10 +514,8 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
         )}
       </div>
 
-      {/* Controls */}
       <div className="text-center text-sm opacity-75">
-        <p>ESC: Exit | SPACE: Pause/Resume</p>
-        <p>← → or A/D: Move Paddle</p>
+        <p>ESC: Exit | SPACE: Launch Ball/Pause | ← → or A/D: Move Paddle</p>
       </div>
     </div>
   );

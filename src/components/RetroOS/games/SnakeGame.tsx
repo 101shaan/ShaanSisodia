@@ -201,12 +201,20 @@ export const SnakeGame: React.FC<SnakeGameProps> = ({ theme, onExit }) => {
       const newDirection = (() => {
         switch (e.key) {
           case 'ArrowUp':
+          case 'w':
+          case 'W':
             return 'UP';
           case 'ArrowDown':
+          case 's':
+          case 'S':
             return 'DOWN';
           case 'ArrowLeft':
+          case 'a':
+          case 'A':
             return 'LEFT';
           case 'ArrowRight':
+          case 'd':
+          case 'D':
             return 'RIGHT';
           default:
             return null;
