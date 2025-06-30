@@ -22,8 +22,8 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
   const scoreRef = useRef(0);
   const livesRef = useRef(3);
   
-  const [score, setScore] = useState(0);
-  const [lives, setLives] = useState(3);
+  const [, setScore] = useState(0);
+  const [, setLives] = useState(3);
   const [, setGameState] = useState(WAITING);
 
   // Game map
@@ -232,7 +232,7 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
 
   const checkCollisions = () => {
     ghosts.current.forEach(ghost => {
-      if (Math.abs(pacman.current.x - ghost.x) < 10 && Math.abs(pacman.current.y - ghost.y) < 10) {
+      if (Math.abs(pacman.current.x - ghost.x) < 15 && Math.abs(pacman.current.y - ghost.y) < 15) {
         if (ghost.eatable) {
           ghost.eaten = tickRef.current;
           ghost.eatable = null;
@@ -247,6 +247,12 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
           } else {
             // Reset positions
             pacman.current = { x: 90, y: 160, direction: LEFT, due: LEFT };
+            ghosts.current.forEach((g, i) => {
+              g.x = [90, 100, 80, 110][i];
+              g.y = 80;
+              g.eatable = null;
+              g.eaten = null;
+            });
           }
         }
       }
@@ -381,8 +387,8 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
     // Draw UI
     ctx.fillStyle = colors.primary;
     ctx.font = '20px monospace';
-    ctx.fillText(`Score: ${score}`, 10, canvas.height - 40);
-    ctx.fillText(`Lives: ${lives}`, 10, canvas.height - 15);
+    ctx.fillText(`Score: ${scoreRef.current}`, 10, canvas.height - 40);
+    ctx.fillText(`Lives: ${livesRef.current}`, 10, canvas.height - 15);
 
     // Game state overlays
     if (gameStateRef.current === WAITING) {
@@ -407,7 +413,7 @@ export const PacmanGame: React.FC<PacmanGameProps> = ({ theme, onExit }) => {
       ctx.textAlign = 'center';
       ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2 - 20);
       ctx.font = '16px monospace';
-      ctx.fillText(`Final Score: ${score}`, canvas.width/2, canvas.height/2 + 20);
+      ctx.fillText(`Final Score: ${scoreRef.current}`, canvas.width/2, canvas.height/2 + 20);
       ctx.fillText('Press SPACE to Restart', canvas.width/2, canvas.height/2 + 50);
       ctx.textAlign = 'left';
     }

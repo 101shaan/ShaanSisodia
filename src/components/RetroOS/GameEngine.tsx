@@ -4,7 +4,7 @@ import { SnakeGame } from './games/SnakeGame';
 import { TetrisGame } from './games/TetrisGame';
 import { InvadersGame } from './games/InvadersGame';
 import { PongGame } from './games/PongGame';
-import { BreakoutGame } from './games/BreakoutGame';
+import BreakoutGame from './games/BreakoutGame';
 import { PacmanGame } from './games/PacmanGame';
 import { ChessGame } from './games/ChessGame';
 
@@ -83,7 +83,7 @@ export const GameEngine: React.FC<GameEngineProps> = ({
       case 'pong':
         return <PongGame theme={theme} onExit={onGameExit} />;
       case 'breakout':
-        return <BreakoutGame theme={theme} onExit={onGameExit} />;
+        return <BreakoutGame onGameOver={onGameExit} />;
       case 'pacman':
         return <PacmanGame theme={theme} onExit={onGameExit} />;
       case 'chess':

@@ -1,329 +1,337 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 
 interface BreakoutGameProps {
-  theme: string;
-  onExit: () => void;
+  onGameOver?: () => void;
 }
 
-export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => {
+interface Brick {
+  x: number;
+  y: number;
+  color: string;
+  width: number;
+  height: number;
+}
+
+interface Paddle {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  dx: number;
+}
+
+interface Ball {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  speed: number;
+  dx: number;
+  dy: number;
+}
+
+const BreakoutGame: React.FC<BreakoutGameProps> = ({ onGameOver }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
-  const keysRef = useRef<{ [key: string]: boolean }>({});
-  
-  // Game state
-  const [gameState, setGameState] = useState<'start' | 'playing' | 'gameOver' | 'won'>('start');
+  const gameLoopRef = useRef<number>();
+  const [gameStarted, setGameStarted] = useState(false);
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
-  const [level, setLevel] = useState(1);
-
+  
   // Game constants
-  const CANVAS_WIDTH = 800;
-  const CANVAS_HEIGHT = 600;
-  const PADDLE_WIDTH = 100;
-  const PADDLE_HEIGHT = 10;
-  const BALL_SIZE = 10;
-  const BRICK_ROWS = 5;
-  const BRICK_COLS = 10;
-  const BRICK_WIDTH = 76;
-  const BRICK_HEIGHT = 20;
-  const PADDLE_SPEED = 8;
-  const BALL_SPEED = 5;
+  const CANVAS_WIDTH = 400;
+  const CANVAS_HEIGHT = 500;
+  const BRICK_GAP = 2;
+  const BRICK_WIDTH = 25;
+  const BRICK_HEIGHT = 12;
+  const WALL_SIZE = 12;
 
-  // Game objects
-  const gameObjects = useRef({
-    paddle: { x: CANVAS_WIDTH / 2 - PADDLE_WIDTH / 2, y: CANVAS_HEIGHT - 30 },
-    ball: { x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT - 50, dx: 0, dy: 0, stuck: true },
-    bricks: [] as Array<{ x: number; y: number; visible: boolean; hits: number }>
+  // Level layout - same as HTML version
+  const level1 = [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    ['R','R','R','R','R','R','R','R','R','R','R','R','R','R'],
+    ['R','R','R','R','R','R','R','R','R','R','R','R','R','R'],
+    ['O','O','O','O','O','O','O','O','O','O','O','O','O','O'],
+    ['O','O','O','O','O','O','O','O','O','O','O','O','O','O'],
+    ['G','G','G','G','G','G','G','G','G','G','G','G','G','G'],
+    ['G','G','G','G','G','G','G','G','G','G','G','G','G','G'],
+    ['Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y'],
+    ['Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y']
+  ];
+
+  const colorMap: { [key: string]: string } = {
+    'R': '#ff0000',
+    'O': '#ffa500',
+    'G': '#00ff00',
+    'Y': '#ffff00'
+  };
+
+  // Game state refs
+  const bricksRef = useRef<Brick[]>([]);
+  const paddleRef = useRef<Paddle>({
+    x: CANVAS_WIDTH / 2 - BRICK_WIDTH / 2,
+    y: 440,
+    width: BRICK_WIDTH,
+    height: BRICK_HEIGHT,
+    dx: 0
+  });
+  const ballRef = useRef<Ball>({
+    x: 130,
+    y: 260,
+    width: 5,
+    height: 5,
+    speed: 2,
+    dx: 0,
+    dy: 0
   });
 
-  const getThemeColors = () => {
-    switch (theme) {
-      case 'matrix':
-        return { bg: '#000000', primary: '#00ff41', paddle: '#00ff80', ball: '#ffff00', brick: '#008f11' };
-      case 'amber':
-        return { bg: '#1a0f00', primary: '#ffb000', paddle: '#ffff00', ball: '#ffffff', brick: '#cc8800' };
-      case 'cyan':
-        return { bg: '#001a1a', primary: '#00ffff', paddle: '#40ff80', ball: '#ffffff', brick: '#00cccc' };
-      default:
-        return { bg: '#000000', primary: '#00ff41', paddle: '#00ff80', ball: '#ffff00', brick: '#008f11' };
-    }
-  };
-
-  const colors = getThemeColors();
-
-  const initBricks = useCallback(() => {
-    const bricks = [];
-    for (let row = 0; row < BRICK_ROWS; row++) {
-      for (let col = 0; col < BRICK_COLS; col++) {
-        bricks.push({
-          x: col * (BRICK_WIDTH + 4) + 40,
-          y: row * (BRICK_HEIGHT + 4) + 60,
-          visible: true,
-          hits: 1
-        });
+  // Initialize bricks
+  const initializeBricks = useCallback(() => {
+    const bricks: Brick[] = [];
+    for (let row = 0; row < level1.length; row++) {
+      for (let col = 0; col < level1[row].length; col++) {
+        const colorCode = level1[row][col];
+        if (colorCode) {
+          bricks.push({
+            x: WALL_SIZE + (BRICK_WIDTH + BRICK_GAP) * col,
+            y: WALL_SIZE + (BRICK_HEIGHT + BRICK_GAP) * row,
+            color: colorMap[colorCode],
+            width: BRICK_WIDTH,
+            height: BRICK_HEIGHT
+          });
+        }
       }
     }
-    gameObjects.current.bricks = bricks;
+    bricksRef.current = bricks;
   }, []);
 
-  const resetBall = useCallback(() => {
-    gameObjects.current.ball = {
-      x: gameObjects.current.paddle.x + PADDLE_WIDTH / 2,
-      y: CANVAS_HEIGHT - 50,
-      dx: 0,
-      dy: 0,
-      stuck: true
-    };
-  }, []);
-
-  const launchBall = useCallback(() => {
-    if (gameObjects.current.ball.stuck) {
-      const angle = (Math.random() - 0.5) * Math.PI / 3; // Random angle
-      gameObjects.current.ball.dx = Math.sin(angle) * BALL_SPEED;
-      gameObjects.current.ball.dy = -Math.cos(angle) * BALL_SPEED;
-      gameObjects.current.ball.stuck = false;
-    }
-  }, []);
-
-  const resetGame = useCallback(() => {
-    setScore(0);
-    setLives(3);
-    setLevel(1);
-    gameObjects.current.paddle.x = CANVAS_WIDTH / 2 - PADDLE_WIDTH / 2;
-    initBricks();
-    resetBall();
-    setGameState('playing');
-  }, [initBricks, resetBall]);
-
-  const checkCollision = (rect1: any, rect2: any) => {
-    return rect1.x < rect2.x + rect2.width &&
-           rect1.x + rect1.width > rect2.x &&
-           rect1.y < rect2.y + rect2.height &&
-           rect1.y + rect1.height > rect2.y;
+  // Collision detection
+  const collides = (obj1: { x: number; y: number; width: number; height: number }, 
+                   obj2: { x: number; y: number; width: number; height: number }) => {
+    return obj1.x < obj2.x + obj2.width &&
+           obj1.x + obj1.width > obj2.x &&
+           obj1.y < obj2.y + obj2.height &&
+           obj1.y + obj1.height > obj2.y;
   };
 
-  const update = useCallback(() => {
-    if (gameState !== 'playing') return;
+  // Reset ball
+  const resetBall = () => {
+    ballRef.current = {
+      x: 130,
+      y: 260,
+      width: 5,
+      height: 5,
+      speed: 2,
+      dx: 0,
+      dy: 0
+    };
+  };
 
-    const { paddle, ball, bricks } = gameObjects.current;
+  // Game loop
+  const gameLoop = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const context = canvas.getContext('2d');
+    if (!context) return;
+
+    const paddle = paddleRef.current;
+    const ball = ballRef.current;
+    const bricks = bricksRef.current;
+
+    // Clear canvas
+    context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     // Move paddle
-    if (keysRef.current['ArrowLeft'] || keysRef.current['a'] || keysRef.current['A']) {
-      paddle.x = Math.max(0, paddle.x - PADDLE_SPEED);
-    }
-    if (keysRef.current['ArrowRight'] || keysRef.current['d'] || keysRef.current['D']) {
-      paddle.x = Math.min(CANVAS_WIDTH - PADDLE_WIDTH, paddle.x + PADDLE_SPEED);
-    }
+    paddle.x += paddle.dx;
 
-    // Move ball with paddle when stuck
-    if (ball.stuck) {
-      ball.x = paddle.x + PADDLE_WIDTH / 2;
-      return;
+    // Keep paddle within bounds
+    if (paddle.x < WALL_SIZE) {
+      paddle.x = WALL_SIZE;
+    } else if (paddle.x + BRICK_WIDTH > CANVAS_WIDTH - WALL_SIZE) {
+      paddle.x = CANVAS_WIDTH - WALL_SIZE - BRICK_WIDTH;
     }
 
     // Move ball
     ball.x += ball.dx;
     ball.y += ball.dy;
 
-    // Ball collision with walls
-    if (ball.x <= 0 || ball.x >= CANVAS_WIDTH - BALL_SIZE) {
-      ball.dx = -ball.dx;
-      ball.x = ball.x <= 0 ? 0 : CANVAS_WIDTH - BALL_SIZE;
-    }
-    if (ball.y <= 0) {
-      ball.dy = -ball.dy;
-      ball.y = 0;
-    }
-
-    // Ball collision with paddle
-    if (checkCollision(
-      { x: ball.x, y: ball.y, width: BALL_SIZE, height: BALL_SIZE },
-      { x: paddle.x, y: paddle.y, width: PADDLE_WIDTH, height: PADDLE_HEIGHT }
-    )) {
-      if (ball.y + BALL_SIZE > paddle.y && ball.dy > 0) {
-        ball.dy = -ball.dy;
-        ball.y = paddle.y - BALL_SIZE;
-        // Add some angle based on where it hits the paddle
-        const hitPos = (ball.x - paddle.x) / PADDLE_WIDTH;
-        ball.dx = (hitPos - 0.5) * BALL_SPEED;
-      }
+    // Ball wall collisions
+    if (ball.x < WALL_SIZE) {
+      ball.x = WALL_SIZE;
+      ball.dx *= -1;
+    } else if (ball.x + ball.width > CANVAS_WIDTH - WALL_SIZE) {
+      ball.x = CANVAS_WIDTH - WALL_SIZE - ball.width;
+      ball.dx *= -1;
     }
 
-    // Ball collision with bricks
-    for (let i = 0; i < bricks.length; i++) {
-      const brick = bricks[i];
-      if (!brick.visible) continue;
-
-      if (checkCollision(
-        { x: ball.x, y: ball.y, width: BALL_SIZE, height: BALL_SIZE },
-        { x: brick.x, y: brick.y, width: BRICK_WIDTH, height: BRICK_HEIGHT }
-      )) {
-        brick.visible = false;
-        ball.dy = -ball.dy;
-        setScore(prev => prev + 10);
-        break;
-      }
+    if (ball.y < WALL_SIZE) {
+      ball.y = WALL_SIZE;
+      ball.dy *= -1;
     }
 
-    // Check if all bricks are destroyed
-    if (bricks.every(brick => !brick.visible)) {
-      setGameState('won');
-    }
-
-    // Ball falls below paddle
+    // Ball falls below screen
     if (ball.y > CANVAS_HEIGHT) {
       setLives(prev => {
         const newLives = prev - 1;
         if (newLives <= 0) {
-          setGameState('gameOver');
-        } else {
-          resetBall();
+          onGameOver?.();
+          return 0;
         }
         return newLives;
       });
-    }
-  }, [gameState, resetBall]);
-
-  const draw = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Clear canvas
-    ctx.fillStyle = colors.bg;
-    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-    if (gameState === 'start') {
-      ctx.fillStyle = colors.primary;
-      ctx.font = '48px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('BREAKOUT', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 50);
-      ctx.font = '24px monospace';
-      ctx.fillText('Press SPACE to Start', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 20);
-      ctx.fillText('Arrow Keys or A/D to Move', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 60);
-      return;
+      resetBall();
+      setGameStarted(false);
     }
 
-    if (gameState === 'gameOver') {
-      ctx.fillStyle = colors.primary;
-      ctx.font = '48px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('GAME OVER', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 50);
-      ctx.font = '24px monospace';
-      ctx.fillText(`Final Score: ${score}`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 20);
-      ctx.fillText('Press SPACE to Restart', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 60);
-      return;
+    // Ball-paddle collision
+    if (collides(ball, paddle)) {
+      ball.dy *= -1;
+      ball.y = paddle.y - ball.height;
     }
 
-    if (gameState === 'won') {
-      ctx.fillStyle = colors.primary;
-      ctx.font = '48px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('YOU WIN!', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 50);
-      ctx.font = '24px monospace';
-      ctx.fillText(`Score: ${score}`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 20);
-      ctx.fillText('Press SPACE to Restart', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 60);
-      return;
+    // Ball-brick collisions
+    for (let i = 0; i < bricks.length; i++) {
+      const brick = bricks[i];
+      if (collides(ball, brick)) {
+        // Remove brick
+        bricks.splice(i, 1);
+        setScore(prev => prev + 10);
+
+        // Determine collision side and bounce
+        if (ball.y + ball.height - ball.speed <= brick.y ||
+            ball.y >= brick.y + brick.height - ball.speed) {
+          ball.dy *= -1;
+        } else {
+          ball.dx *= -1;
+        }
+
+        // Check win condition
+        if (bricks.length === 0) {
+          onGameOver?.();
+        }
+        break;
+      }
     }
 
-    const { paddle, ball, bricks } = gameObjects.current;
+    // Draw walls
+    context.fillStyle = '#00ff00';
+    context.fillRect(0, 0, CANVAS_WIDTH, WALL_SIZE);
+    context.fillRect(0, 0, WALL_SIZE, CANVAS_HEIGHT);
+    context.fillRect(CANVAS_WIDTH - WALL_SIZE, 0, WALL_SIZE, CANVAS_HEIGHT);
+
+    // Draw ball if moving
+    if (ball.dx || ball.dy) {
+      context.fillStyle = '#ffffff';
+      context.fillRect(ball.x, ball.y, ball.width, ball.height);
+    }
 
     // Draw bricks
-    ctx.fillStyle = colors.brick;
-    for (const brick of bricks) {
-      if (brick.visible) {
-        ctx.fillRect(brick.x, brick.y, BRICK_WIDTH, BRICK_HEIGHT);
-        ctx.strokeStyle = colors.primary;
-        ctx.strokeRect(brick.x, brick.y, BRICK_WIDTH, BRICK_HEIGHT);
-      }
-    }
+    bricks.forEach(brick => {
+      context.fillStyle = brick.color;
+      context.fillRect(brick.x, brick.y, brick.width, brick.height);
+    });
 
     // Draw paddle
-    ctx.fillStyle = colors.paddle;
-    ctx.fillRect(paddle.x, paddle.y, PADDLE_WIDTH, PADDLE_HEIGHT);
+    context.fillStyle = '#00ffff';
+    context.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
 
-    // Draw ball
-    ctx.fillStyle = colors.ball;
-    ctx.fillRect(ball.x, ball.y, BALL_SIZE, BALL_SIZE);
+    gameLoopRef.current = requestAnimationFrame(gameLoop);
+  }, [onGameOver]);
 
-    // Draw UI
-    ctx.fillStyle = colors.primary;
-    ctx.font = '20px monospace';
-    ctx.textAlign = 'left';
-    ctx.fillText(`Score: ${score}`, 20, 30);
-    ctx.fillText(`Lives: ${lives}`, 20, 60);
-    ctx.fillText(`Level: ${level}`, 20, 90);
+  // Keyboard handlers
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    const paddle = paddleRef.current;
+    const ball = ballRef.current;
 
-    if (ball.stuck) {
-      ctx.textAlign = 'center';
-      ctx.fillText('Press SPACE to Launch Ball', CANVAS_WIDTH / 2, 150);
+    // Left arrow or A
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+      paddle.dx = -3;
+      e.preventDefault();
     }
-  }, [gameState, score, lives, level, colors]);
+    // Right arrow or D
+    else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+      paddle.dx = 3;
+      e.preventDefault();
+    }
 
-  const gameLoop = useCallback(() => {
-    update();
-    draw();
-    animationRef.current = requestAnimationFrame(gameLoop);
-  }, [update, draw]);
+    // Space to launch ball
+    if (e.code === 'Space' && ball.dx === 0 && ball.dy === 0) {
+      ball.dx = ball.speed;
+      ball.dy = ball.speed;
+      setGameStarted(true);
+      e.preventDefault();
+    }
+  }, []);
 
+  const handleKeyUp = useCallback((e: KeyboardEvent) => {
+    const paddle = paddleRef.current;
+    
+    if (e.code === 'ArrowLeft' || e.code === 'ArrowRight' || 
+        e.code === 'KeyA' || e.code === 'KeyD') {
+      paddle.dx = 0;
+      e.preventDefault();
+    }
+  }, []);
+
+  // Initialize game
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onExit();
-        return;
-      }
-
-      keysRef.current[e.key] = true;
-
-      if (e.key === ' ') {
-        e.preventDefault();
-        if (gameState === 'start' || gameState === 'gameOver' || gameState === 'won') {
-          resetGame();
-        } else if (gameState === 'playing') {
-          launchBall();
-        }
-      }
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      keysRef.current[e.key] = false;
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    initializeBricks();
+    resetBall();
+    
+    // Start game loop
+    gameLoopRef.current = requestAnimationFrame(gameLoop);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [gameState, onExit, resetGame, launchBall]);
-
-  useEffect(() => {
-    initBricks();
-    gameLoop();
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+      if (gameLoopRef.current) {
+        cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [initBricks, gameLoop]);
+  }, [gameLoop, initializeBricks]);
+
+  // Keyboard event listeners
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [handleKeyDown, handleKeyUp]);
 
   return (
-    <div 
-      className="w-full h-full flex items-center justify-center"
-      style={{ backgroundColor: colors.bg }}
-    >
+    <div className="flex flex-col items-center space-y-4 p-4">
+      <div className="flex space-x-4 text-green-400 font-mono">
+        <div>Score: {score}</div>
+        <div>Lives: {lives}</div>
+      </div>
+      
       <canvas
         ref={canvasRef}
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
-        className="border-2"
-        style={{ borderColor: colors.primary }}
+        className="border border-green-400 bg-black"
         tabIndex={0}
+        style={{ imageRendering: 'pixelated' }}
       />
+      
+      <div className="text-green-400 font-mono text-sm text-center max-w-md">
+        {!gameStarted ? (
+          <div>
+            <div>Press SPACE to launch ball</div>
+            <div>Use ARROW KEYS or A/D to move paddle</div>
+          </div>
+        ) : (
+          <div>Break all the bricks to win!</div>
+        )}
+      </div>
     </div>
   );
-}; 
+};
+
+export default BreakoutGame; 
