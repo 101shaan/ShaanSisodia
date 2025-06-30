@@ -31,10 +31,10 @@ const ContactSection: React.FC = () => {
     <section id="contact" className="py-32 px-6 relative">
       <div className="max-w-7xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-20"
         >
           <h2 className="text-4xl md:text-6xl font-bold mb-8">
@@ -52,10 +52,10 @@ const ContactSection: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           {/* Contact Info & Social Links */}
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="space-y-8"
           >
             <div className="text-center mb-12">
@@ -74,38 +74,26 @@ const ContactSection: React.FC = () => {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.6 }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
                   whileHover={{ 
-                    y: -8, 
+                    y: -5, 
                     scale: 1.02,
                     transition: { duration: 0.2, ease: "easeOut" }
                   }}
                   whileTap={{ scale: 0.98 }}
-                  className={`group relative p-8 bg-gray-900/50 rounded-xl border border-gray-800 hover:border-cyan-500/50 transition-all duration-300 text-center overflow-hidden will-change-transform ${link.color}`}
-                  style={{
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                  }}
+                  className={`group relative p-8 bg-gray-900/50 rounded-xl border border-gray-800 hover:border-cyan-500/50 transition-all duration-300 text-center overflow-hidden ${link.color}`}
                 >
                   {/* Background glow effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    initial={false}
-                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   
                   {/* Content */}
                   <div className="relative z-10">
-                    <motion.div 
-                      className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300"
-                      whileHover={{ 
-                        rotate: [0, -10, 10, 0],
-                        transition: { duration: 0.5, ease: "easeInOut" }
-                      }}
-                    >
+                    <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform duration-300">
                       <link.icon className="w-8 h-8 text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300" />
-                    </motion.div>
+                    </div>
                     
                     <h4 className="text-xl font-semibold text-gray-100 mb-2 group-hover:text-cyan-400 transition-colors duration-300">
                       {link.name}
@@ -115,33 +103,24 @@ const ContactSection: React.FC = () => {
                       {link.description}
                     </p>
                     
-                    <motion.div
-                      className="flex items-center justify-center text-cyan-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      initial={{ x: -10 }}
-                      whileHover={{ x: 0 }}
-                    >
+                    <div className="flex items-center justify-center text-cyan-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <span>Connect</span>
                       <ExternalLink className="w-4 h-4 ml-2" />
-                    </motion.div>
+                    </div>
                   </div>
 
                   {/* Animated border */}
-                  <motion.div
-                    className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-cyan-500 to-purple-500"
-                    initial={{ width: 0 }}
-                    whileHover={{ width: '100%' }}
-                    transition={{ duration: 0.3 }}
-                  />
+                  <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-cyan-500 to-purple-500 w-0 group-hover:w-full transition-all duration-300" />
                 </motion.a>
               ))}
             </div>
 
             {/* Terminal Hint */}
             <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.5, duration: 0.8 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
               className="mt-16 p-6 bg-gray-900/30 rounded-lg border border-gray-800 max-w-md mx-auto"
             >
               <div className="flex items-center space-x-3 mb-3">

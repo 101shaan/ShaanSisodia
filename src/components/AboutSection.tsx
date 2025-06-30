@@ -25,10 +25,10 @@ const AboutSection: React.FC = () => {
     <section id="about" className="py-32 px-6 relative">
       <div className="max-w-7xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-20"
         >
           <h2 className="text-4xl md:text-6xl font-bold mb-8">
@@ -43,10 +43,10 @@ const AboutSection: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-20">
           {/* Left side - Philosophy */}
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="space-y-8"
           >
             <div className="space-y-6">
@@ -61,10 +61,10 @@ const AboutSection: React.FC = () => {
             </div>
 
             <motion.blockquote
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.6 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
               className="border-l-4 border-cyan-400 pl-6 py-4 bg-gray-900/50 rounded-r"
             >
               <p className="text-xl italic text-cyan-300 font-light">
@@ -75,10 +75,10 @@ const AboutSection: React.FC = () => {
 
           {/* Right side - Stats Grid */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="relative"
           >
             <div className="grid grid-cols-2 gap-4">
@@ -90,10 +90,10 @@ const AboutSection: React.FC = () => {
               ].map((stat, index) => (
                 <motion.div
                   key={stat.title}
-                  initial={{ opacity: 0, scale: 0.8 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  transition={{ delay: index * 0.1, duration: 0.4 }}
                   className="p-6 bg-gray-900/50 rounded-lg border border-gray-800 text-center"
                 >
                   <div className={`text-3xl font-bold text-${stat.color}-400 mb-2`}>
@@ -108,31 +108,27 @@ const AboutSection: React.FC = () => {
 
         {/* Principles */}
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="grid grid-cols-1 md:grid-cols-3 gap-8"
         >
           {principles.map((principle, index) => (
             <motion.div
               key={principle.title}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.2, duration: 0.6 }}
+              transition={{ delay: index * 0.1, duration: 0.5 }}
               whileHover={{ 
-                y: -10, 
-                scale: 1.02,
+                y: -5,
                 transition: { duration: 0.2, ease: "easeOut" }
               }}
-              className="group p-8 bg-gray-900/50 rounded-lg border border-gray-800 hover:border-cyan-500/50 transition-all duration-300 will-change-transform"
-              style={{
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-              }}
+              className="group p-8 bg-gray-900/50 rounded-lg border border-gray-800 hover:border-cyan-500/50 transition-all duration-300"
             >
               <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-lg flex items-center justify-center mr-4 group-hover:scale-105 transition-transform duration-200">
                   <principle.icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-100">{principle.title}</h3>

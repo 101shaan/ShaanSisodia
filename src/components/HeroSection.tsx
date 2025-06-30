@@ -28,7 +28,7 @@ const HeroSection: React.FC = () => {
             timeout = setTimeout(callback, 1500);
           }
         }
-      }, 50); // Smoother, less typewriter-y
+      }, 50);
     };
 
     const cycle = () => {
@@ -53,34 +53,12 @@ const HeroSection: React.FC = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
-      {/* Animated grid background */}
-      <div className="absolute inset-0 opacity-10">
-        <motion.div
-          animate={{ 
-            backgroundPosition: ['0px 0px', '50px 50px'],
-          }}
-          transition={{ 
-            duration: 20, 
-            repeat: Infinity, 
-            ease: 'linear' 
-          }}
-          className="w-full h-full"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '50px 50px'
-          }}
-        />
-      </div>
-
       <div className="relative z-10 text-center max-w-6xl mx-auto">
-        {/* Main heading with smoother typewriter effect */}
+        {/* Main heading */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-8"
         >
           <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-6">
@@ -88,8 +66,8 @@ const HeroSection: React.FC = () => {
               {displayText}
               {showCursor && (
                 <motion.span
-                  animate={{ opacity: [1, 0] }}
-                  transition={{ duration: 0.8, repeat: Infinity }}
+                  animate={{ opacity: [1, 0, 1] }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
                   className="text-cyan-400"
                 >
                   |
@@ -99,11 +77,11 @@ const HeroSection: React.FC = () => {
           </h1>
         </motion.div>
 
-        {/* Subtitle with staggered animation */}
+        {/* Subtitle */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 0.8 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
           className="mb-12"
         >
           <p className="text-xl md:text-2xl text-gray-300 mb-6 font-light">
@@ -115,36 +93,32 @@ const HeroSection: React.FC = () => {
           </p>
         </motion.div>
 
-        {/* Action buttons with proper navigation */}
+        {/* Action buttons */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2.2, duration: 0.6 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.6 }}
           className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16"
         >
           <motion.button
             onClick={() => scrollToSection('projects')}
-            whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(0, 255, 255, 0.3)' }}
-            whileTap={{ scale: 0.95 }}
-            className="group relative px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-gray-900 font-semibold rounded-sm overflow-hidden interactive"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-gray-900 font-semibold rounded-sm interactive"
           >
-            <span className="relative z-10 flex items-center space-x-2">
+            <span className="flex items-center space-x-2">
               <Code className="w-5 h-5" />
               <span>View Projects</span>
             </span>
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-400"
-              initial={{ x: '-100%' }}
-              whileHover={{ x: 0 }}
-              transition={{ duration: 0.3 }}
-            />
           </motion.button>
 
           <motion.button
             onClick={() => scrollToSection('contact')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="group px-8 py-4 border border-cyan-500/50 text-cyan-400 font-semibold rounded-sm hover:bg-cyan-500/10 transition-all duration-200 interactive"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            className="px-8 py-4 border border-cyan-500/50 text-cyan-400 font-semibold rounded-sm hover:bg-cyan-500/10 transition-colors duration-200 interactive"
           >
             <span className="flex items-center space-x-2">
               <Cpu className="w-5 h-5" />
@@ -157,22 +131,22 @@ const HeroSection: React.FC = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 3, duration: 0.8 }}
+          transition={{ delay: 0.9, duration: 0.6 }}
           className="flex flex-col items-center"
         >
           <span className="text-sm text-gray-500 mb-2">Scroll to explore</span>
           <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >
             <ChevronDown className="w-6 h-6 text-cyan-400" />
           </motion.div>
         </motion.div>
       </div>
 
-      {/* Glowing orbs */}
-      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+      {/* Subtle background elements */}
+      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
     </section>
   );
 };

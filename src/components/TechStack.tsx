@@ -33,10 +33,10 @@ const TechStack: React.FC = () => {
     <section id="tech" className="py-32 px-6 relative overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-20"
         >
           <h2 className="text-4xl md:text-6xl font-bold mb-8">
@@ -55,10 +55,10 @@ const TechStack: React.FC = () => {
           {techCategories.map((category, categoryIndex) => (
             <motion.div
               key={category.title}
-              initial={{ opacity: 0, x: categoryIndex === 0 ? -50 : 50 }}
+              initial={{ opacity: 0, x: categoryIndex === 0 ? -20 : 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: categoryIndex * 0.2 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
               className="space-y-8"
             >
               <h3 className="text-3xl font-bold text-gray-100 mb-8 text-center lg:text-left">
@@ -70,24 +70,20 @@ const TechStack: React.FC = () => {
                 {category.items.map((item, index) => (
                   <motion.div
                     key={item.name}
-                    initial={{ opacity: 0, scale: 0.8 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ 
-                      delay: (categoryIndex * 0.2) + (index * 0.1), 
-                      duration: 0.6,
-                      type: "spring",
-                      stiffness: 100
+                      delay: index * 0.05, 
+                      duration: 0.4,
+                      ease: "easeOut"
                     }}
                     whileHover={{ 
                       scale: 1.05, 
-                      y: -5,
+                      y: -3,
                       transition: { duration: 0.2, ease: "easeOut" }
                     }}
-                    className="group p-6 bg-gray-900/30 rounded-xl border border-gray-800 hover:border-cyan-500/50 transition-all duration-300 text-center will-change-transform"
-                    style={{
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                    }}
+                    className="group p-6 bg-gray-900/30 rounded-xl border border-gray-800 hover:border-cyan-500/50 transition-all duration-300 text-center"
                   >
                     <div className="flex flex-col items-center space-y-3">
                       <div 
@@ -111,14 +107,6 @@ const TechStack: React.FC = () => {
                         {item.name}
                       </h4>
                     </div>
-                    
-                    {/* Hover glow effect */}
-                    <div 
-                      className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                      style={{
-                        background: `radial-gradient(circle at center, ${item.color}10 0%, transparent 70%)`
-                      }}
-                    />
                   </motion.div>
                 ))}
               </div>

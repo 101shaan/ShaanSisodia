@@ -73,10 +73,10 @@ const ProjectsSection: React.FC = () => {
     <section id="projects" className="py-32 px-6 relative">
       <div className="max-w-7xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-20"
         >
           <h2 className="text-4xl md:text-6xl font-bold mb-8">
@@ -95,11 +95,11 @@ const ProjectsSection: React.FC = () => {
           {projects.map((project, index) => (
             <motion.div
               key={project.id}
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              whileHover={{ y: -10, scale: 1.02 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ y: -8, scale: 1.02 }}
               onClick={() => setSelectedProject(project)}
               className="group cursor-pointer interactive"
             >
@@ -226,31 +226,27 @@ const ProjectsSection: React.FC = () => {
                     
                     <div className="flex space-x-4">
                       {selectedProject.github && (
-                        <motion.a
+                        <a
                           href={selectedProject.github}
                           target="_blank"
                           rel="noopener noreferrer"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
                           className="flex items-center px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-100 rounded-lg transition-colors duration-200"
                         >
                           <Github className="w-5 h-5 mr-2" />
                           View Code
-                        </motion.a>
+                        </a>
                       )}
                       
                       {selectedProject.live && (
-                        <motion.a
+                        <a
                           href={selectedProject.live}
                           target="_blank"
                           rel="noopener noreferrer"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
                           className="flex items-center px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-500 text-white rounded-lg hover:shadow-lg hover:shadow-cyan-500/25 transition-all duration-200"
                         >
                           <ExternalLink className="w-5 h-5 mr-2" />
                           Live Demo
-                        </motion.a>
+                        </a>
                       )}
                     </div>
                   </div>
