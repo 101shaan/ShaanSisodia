@@ -37,12 +37,13 @@ export const InvadersGame: React.FC<InvadersGameProps> = ({ theme, onExit }) => 
   const bulletIdRef = useRef(0);
   const invaderIdRef = useRef(0);
   const keysRef = useRef<{ [key: string]: boolean }>({});
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const GAME_WIDTH = 800;
   const GAME_HEIGHT = 600;
-  const PLAYER_SPEED = 5;
-  const BULLET_SPEED = 8;
-  const INVADER_SPEED = 1;
+  const PLAYER_SPEED = 6;
+  const BULLET_SPEED = 10;
+  const INVADER_SPEED = 0.5;
 
   const getThemeColors = () => {
     switch (theme) {
@@ -238,8 +239,8 @@ export const InvadersGame: React.FC<InvadersGameProps> = ({ theme, onExit }) => 
       return prev;
     });
 
-    // Random invader shooting
-    if (Math.random() < 0.002) {
+    // Random invader shooting (reduced frequency)
+    if (Math.random() < 0.001) {
       setInvaders(prev => {
         const aliveInvaders = prev.filter(inv => inv.alive);
         if (aliveInvaders.length > 0) {
@@ -349,12 +350,18 @@ export const InvadersGame: React.FC<InvadersGameProps> = ({ theme, onExit }) => 
     if (!gameStarted) {
       setInvaders(createInvaders(1));
     }
+    if (containerRef.current) {
+      containerRef.current.focus();
+    }
   }, [gameStarted, createInvaders]);
 
   return (
     <div 
-      className="w-full h-full flex flex-col items-center justify-center p-8"
+      ref={containerRef}
+      className="w-full h-full flex flex-col items-center justify-center p-8 outline-none"
       style={{ backgroundColor: colors.bg, color: colors.primary }}
+      tabIndex={0}
+      onFocus={() => {}}
     >
       {/* Game Header */}
       <div className="flex justify-between w-full max-w-4xl mb-4">
