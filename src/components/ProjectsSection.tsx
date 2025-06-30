@@ -24,7 +24,7 @@ const ProjectsSection: React.FC = () => {
       description: 'Custom x86 operating system kernel built from scratch in C and Assembly',
       longDescription: 'A complete x86 operating system implementation featuring memory management, process scheduling, interrupt handling, and basic I/O operations. Built entirely in C and Assembly with support for VGA text mode, keyboard input, ATA disk operations, and FAT12 file system. Includes a custom bootloader, physical/virtual memory managers, and a kernel shell for testing.',
       tech: ['C', 'Assembly', 'x86 Architecture', 'Low-level Programming', 'QEMU'],
-      image: 'public/ShaanOS.png',
+      image: '/ShaanOS.png',
       github: 'https://github.com/101shaan/ShaanOS',
       status: 'completed'
     },
@@ -34,7 +34,7 @@ const ProjectsSection: React.FC = () => {
       description: 'Real-time civilization simulation with AI-generated lore and complex population dynamics',
       longDescription: 'A sophisticated Python/Pygame civilization simulation modeling population growth, territorial expansion, warfare, and diplomacy. Features realistic demographic transitions, OpenAI GPT integration for dynamic lore generation, and detailed visualization of civilization interactions. Includes God Mode, variable simulation speeds, and rich UI for exploring civilization details.',
       tech: ['Python', 'Pygame', 'NumPy', 'OpenAI API', 'AI Integration', 'Simulation'],
-      image: 'public/CivSim.png',
+      image: '/CivSim.png',
       github: 'https://github.com/101shaan/CIVSIM',
       status: 'completed'
     },
@@ -44,7 +44,7 @@ const ProjectsSection: React.FC = () => {
       description: 'Full-stack mystery story platform with modern web architecture and dark aesthetics',
       longDescription: 'A sophisticated web platform delivering daily mysterious stories and unexplained phenomena. Built with React, Next.js, and Supabase, featuring a responsive dark theme, search functionality, archive system, and newsletter integration. Includes a CLI tool for content management and modern deployment pipeline.',
       tech: ['React', 'Next.js', 'Supabase', 'TypeScript', 'TailwindCSS', 'PostgreSQL'],
-      image: 'public/dailyglitch.png',
+      image: '/DailyGlitch.png',
       github: 'https://github.com/101shaan/DailyGlitch',
       live: 'https://dailyglitch.org',
       status: 'completed'
@@ -55,7 +55,7 @@ const ProjectsSection: React.FC = () => {
       description: 'A blazingly fast, memory-safe systems programming language that compiles to native machine code',
       longDescription: 'Prism is a modern systems programming language designed for speed, safety, and clarity. It combines the performance of C/Rust with the expressiveness of modern languages, featuring lightning-fast compilation to native machine code, memory safety without garbage collection, powerful type inference, built-in package management, and zero-cost abstractions. Currently in early development with lexer, parser, and type system foundations being implemented.',
       tech: ['Rust', 'LLVM', 'Systems Programming', 'Compiler Design', 'Language Theory'],
-      image: 'public/prism.png',
+      image: '/Prism.png',
       github: 'https://github.com/101shaan/Prism',
       status: 'in-progress'
     }
