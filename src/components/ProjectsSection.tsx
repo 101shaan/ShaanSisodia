@@ -24,7 +24,7 @@ const ProjectsSection: React.FC = () => {
       description: 'Custom x86 operating system kernel built from scratch in C and Assembly',
       longDescription: 'A complete x86 operating system implementation featuring memory management, process scheduling, interrupt handling, and basic I/O operations. Built entirely in C and Assembly with support for VGA text mode, keyboard input, ATA disk operations, and FAT12 file system. Includes a custom bootloader, physical/virtual memory managers, and a kernel shell for testing.',
       tech: ['C', 'Assembly', 'x86 Architecture', 'Low-level Programming', 'QEMU'],
-      image: 'https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg',
+      image: 'public/ShaanOS.png',
       github: 'https://github.com/101shaan/ShaanOS',
       status: 'completed'
     },
@@ -34,7 +34,7 @@ const ProjectsSection: React.FC = () => {
       description: 'Real-time civilization simulation with AI-generated lore and complex population dynamics',
       longDescription: 'A sophisticated Python/Pygame civilization simulation modeling population growth, territorial expansion, warfare, and diplomacy. Features realistic demographic transitions, OpenAI GPT integration for dynamic lore generation, and detailed visualization of civilization interactions. Includes God Mode, variable simulation speeds, and rich UI for exploring civilization details.',
       tech: ['Python', 'Pygame', 'NumPy', 'OpenAI API', 'AI Integration', 'Simulation'],
-      image: 'https://images.pexels.com/photos/325229/pexels-photo-325229.jpeg',
+      image: 'public/CivSim.png',
       github: 'https://github.com/101shaan/CIVSIM',
       status: 'completed'
     },
