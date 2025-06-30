@@ -33,7 +33,7 @@ const ContactSection: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-20"
         >
@@ -54,7 +54,7 @@ const ContactSection: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="space-y-8"
           >
@@ -76,7 +76,7 @@ const ContactSection: React.FC = () => {
                   rel="noopener noreferrer"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: true, amount: 0.3 }}
                   transition={{ delay: index * 0.1, duration: 0.5 }}
                   whileHover={{ 
                     y: -5, 
@@ -84,18 +84,18 @@ const ContactSection: React.FC = () => {
                     transition: { duration: 0.2, ease: "easeOut" }
                   }}
                   whileTap={{ scale: 0.98 }}
-                  className={`group relative p-8 bg-gray-900/50 rounded-xl border border-gray-800 hover:border-cyan-500/50 transition-all duration-300 text-center overflow-hidden ${link.color}`}
+                  className={`group relative p-8 bg-gray-900/50 rounded-xl border border-gray-800 hover:border-cyan-500/50 css-transition text-center overflow-hidden ${link.color}`}
                 >
                   {/* Background glow effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 css-transition" />
                   
                   {/* Content */}
                   <div className="relative z-10">
-                    <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform duration-300">
-                      <link.icon className="w-8 h-8 text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300" />
+                    <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 css-transition">
+                      <link.icon className="w-8 h-8 text-cyan-400 group-hover:text-cyan-300 css-transition" />
                     </div>
                     
-                    <h4 className="text-xl font-semibold text-gray-100 mb-2 group-hover:text-cyan-400 transition-colors duration-300">
+                    <h4 className="text-xl font-semibold text-gray-100 mb-2 group-hover:text-cyan-400 css-transition">
                       {link.name}
                     </h4>
                     
@@ -103,14 +103,14 @@ const ContactSection: React.FC = () => {
                       {link.description}
                     </p>
                     
-                    <div className="flex items-center justify-center text-cyan-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="inline-flex items-center text-cyan-400 font-medium">
                       <span>Connect</span>
                       <ExternalLink className="w-4 h-4 ml-2" />
                     </div>
                   </div>
 
                   {/* Animated border */}
-                  <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-cyan-500 to-purple-500 w-0 group-hover:w-full transition-all duration-300" />
+                  <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-cyan-500 to-purple-500 w-0 group-hover:w-full css-transition" />
                 </motion.a>
               ))}
             </div>
@@ -119,7 +119,7 @@ const ContactSection: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, amount: 0.3 }}
               transition={{ delay: 0.4, duration: 0.6 }}
               className="mt-16 p-6 bg-gray-900/30 rounded-lg border border-gray-800 max-w-md mx-auto"
             >

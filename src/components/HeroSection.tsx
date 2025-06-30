@@ -4,7 +4,7 @@ import { ChevronDown, Code, Cpu } from 'lucide-react';
 
 const HeroSection: React.FC = () => {
   const [displayText, setDisplayText] = useState('');
-  const [showCursor, setShowCursor] = useState(true);
+  const [showCursor] = useState(true);
   const [currentPhase, setCurrentPhase] = useState(0);
   
   const phases = [

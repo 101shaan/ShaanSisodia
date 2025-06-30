@@ -58,7 +58,7 @@ I hope you enjoy my portfolio / OS.
 - /projects/shaanos: Custom operating system
 - /projects/civsim: Civilization simulator
 - /projects/dailyglitch: Mystery story platform
-- /projects/ardenvale: Dark Souls RPG
+- /projects/prism: Systems programming language
 
 Enjoy exploring!`
                 },
@@ -265,8 +265,8 @@ Explore the unexplained, one glitch at a time.`
                 }
               }
             },
-            'ardenvale': {
-              name: 'ardenvale',
+            'prism': {
+              name: 'prism',
               type: 'directory',
               permissions: 'drwxr-xr-x',
               modified: new Date(),
@@ -277,35 +277,38 @@ Explore the unexplained, one glitch at a time.`
                   permissions: '-rw-r--r--',
                   size: 1792,
                   modified: new Date(),
-                  content: `# Ardenvale RPG - Dark Souls Inspired Text RPG
+                  content: `# Prism Language - Fast, Memory-Safe Systems Programming
 
-A complex text-based fantasy RPG inspired by Dark Souls.
+A blazingly fast, memory-safe systems programming language that compiles to native machine code.
 
 ## Features:
-- Strategic turn-based combat system
-- Character progression and leveling
-- 15+ unique locations across 4 regions
-- Beacon fast-travel system
-- NPC dialogue trees and quest system
-- Inventory management with equipment
-- Save/load functionality
+- Lightning-fast compilation to native machine code
+- Memory safety without garbage collection
+- Powerful type inference - write less, get more
+- Built-in package management
+- Zero-cost abstractions
+- Excellent error messages
 
-## Game World:
-- Shrine Grounds: Starting area with Firelink Shrine
-- Outer Lands: Undead Settlement, Cathedral of the Deep
-- Ashen Woods: Farron Keep, burning forests
-- Northern Realm: Lothric Castle, Anor Londo
+## Current Status:
+🚧 Early Development
+
+## Roadmap:
+- [x] Project setup
+- [ ] Lexer/Tokenizer
+- [ ] Parser & AST
+- [ ] Type system foundations
+- [ ] Basic interpreter
 
 ## Technical Features:
-- Modular Python architecture
-- Object-oriented design
-- Complex game state management
-- ASCII art and rich text interface
+- Written in Rust for compiler development
+- LLVM backend for code generation
+- Modern language design philosophy
+- Fast by default, safe by default, clear by default
 
 ## GitHub:
-https://github.com/101shaan/Arvendale
+https://github.com/101shaan/Prism
 
-Prepare to die... in text form!`
+"Refract complexity into clarity" ✨`
                 }
               }
             }

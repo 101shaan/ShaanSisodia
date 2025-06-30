@@ -63,7 +63,6 @@ export const RetroOS: React.FC<RetroOSProps> = ({ isActive, onExit }) => {
         <BootSequence
           onComplete={handleBootComplete}
           theme={currentTheme}
-          soundEnabled={soundEnabled}
         />
       ) : showTerminal ? (
         <TerminalCore

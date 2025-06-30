@@ -4,13 +4,11 @@ import { motion } from 'framer-motion';
 interface BootSequenceProps {
   onComplete: () => void;
   theme: string;
-  soundEnabled: boolean;
 }
 
 export const BootSequence: React.FC<BootSequenceProps> = ({ 
   onComplete, 
-  theme, 
-  soundEnabled 
+  theme
 }) => {
   const [currentPhase, setCurrentPhase] = useState(0);
   const [output, setOutput] = useState<string[]>([]);
@@ -107,7 +105,6 @@ export const BootSequence: React.FC<BootSequenceProps> = ({
   const runBootSequence = () => {
     console.log("Boot sequence initiated");
     let timeoutId: NodeJS.Timeout | null = null;
-    let phaseIndex = 0;
     
     const processPhase = (index: number) => {
       if (index >= bootPhases.length) {

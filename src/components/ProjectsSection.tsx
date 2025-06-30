@@ -44,20 +44,20 @@ const ProjectsSection: React.FC = () => {
       description: 'Full-stack mystery story platform with modern web architecture and dark aesthetics',
       longDescription: 'A sophisticated web platform delivering daily mysterious stories and unexplained phenomena. Built with React, Next.js, and Supabase, featuring a responsive dark theme, search functionality, archive system, and newsletter integration. Includes a CLI tool for content management and modern deployment pipeline.',
       tech: ['React', 'Next.js', 'Supabase', 'TypeScript', 'TailwindCSS', 'PostgreSQL'],
-      image: 'https://images.pexels.com/photos/373543/pexels-photo-373543.jpeg',
+      image: 'public/dailyglitch.png',
       github: 'https://github.com/101shaan/DailyGlitch',
       live: 'https://dailyglitch.org',
       status: 'completed'
     },
     {
-      id: 'ardenvale',
-      title: 'Ardenvale RPG',
-      description: 'Complex text-based Dark Souls-inspired RPG with deep mechanics and rich world',
-      longDescription: 'A sophisticated text-based fantasy RPG inspired by Dark Souls, featuring strategic turn-based combat, character progression, quest systems, and rich world exploration. Includes over 15 unique locations across 4 regions, beacon fast-travel system, NPC dialogue trees, inventory management, and save/load functionality. Built with modular Python architecture for expandability.',
-      tech: ['Python', 'Object-oriented Design', 'Game Logic', 'ASCII Art', 'Save Systems'],
-      image: 'https://images.pexels.com/photos/158826/structure-light-led-movement-158826.jpeg',
-      github: 'https://github.com/101shaan/Arvendale',
-      status: 'completed'
+      id: 'prism',
+      title: 'Prism Language',
+      description: 'A blazingly fast, memory-safe systems programming language that compiles to native machine code',
+      longDescription: 'Prism is a modern systems programming language designed for speed, safety, and clarity. It combines the performance of C/Rust with the expressiveness of modern languages, featuring lightning-fast compilation to native machine code, memory safety without garbage collection, powerful type inference, built-in package management, and zero-cost abstractions. Currently in early development with lexer, parser, and type system foundations being implemented.',
+      tech: ['Rust', 'LLVM', 'Systems Programming', 'Compiler Design', 'Language Theory'],
+      image: 'public/prism.png',
+      github: 'https://github.com/101shaan/Prism',
+      status: 'in-progress'
     }
   ];
 
@@ -75,7 +75,7 @@ const ProjectsSection: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-20"
         >
@@ -97,19 +97,19 @@ const ProjectsSection: React.FC = () => {
               key={project.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               whileHover={{ y: -8, scale: 1.02 }}
               onClick={() => setSelectedProject(project)}
-              className="group cursor-pointer interactive"
+              className="group cursor-pointer"
             >
-              <div className="relative overflow-hidden rounded-lg bg-gray-900/50 border border-gray-800 hover:border-cyan-500/50 transition-all duration-300">
+              <div className="relative overflow-hidden rounded-lg bg-gray-900/50 border border-gray-800 hover:border-cyan-500/50 css-transition">
                 {/* Project Image */}
                 <div className="relative h-48 overflow-hidden">
                   <img
                     src={project.image}
                     alt={project.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent" />
                   
@@ -121,7 +121,7 @@ const ProjectsSection: React.FC = () => {
 
                 {/* Project Info */}
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-100 mb-2 group-hover:text-cyan-400 transition-colors duration-200">
+                  <h3 className="text-xl font-bold text-gray-100 mb-2 group-hover:text-cyan-400 css-transition">
                     {project.title}
                   </h3>
                   <p className="text-gray-400 mb-4 leading-relaxed">
@@ -147,13 +147,10 @@ const ProjectsSection: React.FC = () => {
 
                   {/* Action Links */}
                   <div className="flex items-center space-x-4">
-                    <motion.div
-                      whileHover={{ x: 5 }}
-                      className="flex items-center text-cyan-400 text-sm font-medium"
-                    >
+                    <div className="flex items-center text-cyan-400 text-sm font-medium">
                       <span>View Details</span>
                       <ExternalLink className="w-4 h-4 ml-2" />
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
               </div>

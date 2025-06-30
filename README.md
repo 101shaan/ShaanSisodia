@@ -92,7 +92,7 @@ project/
 - **ShaanOS** — Custom x86 OS ([repo](https://github.com/101shaan/ShaanOS))
 - **CivSim** — Civilization simulator ([repo](https://github.com/101shaan/CIVSIM))
 - **Daily Glitch** — Mystery story platform ([repo](https://github.com/101shaan/DailyGlitch))
-- **Ardenvale RPG** — Dark Souls-inspired text RPG ([repo](https://github.com/101shaan/Arvendale))
+- **Prism Language** — Fast, memory-safe systems programming language ([repo](https://github.com/101shaan/Prism))
 
 ---
 

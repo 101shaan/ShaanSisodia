@@ -200,9 +200,9 @@ export const TerminalCore: React.FC<TerminalCoreProps> = ({
   if (gameMode) {
     return (
       <GameEngine
-        game={gameMode}
+        currentGame={gameMode}
         theme={theme}
-        onExit={() => setGameMode(null)}
+        onGameExit={() => setGameMode(null)}
       />
     );
   }

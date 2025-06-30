@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { SnakeGame } from './games/SnakeGame';
 import { TetrisGame } from './games/TetrisGame';
@@ -9,45 +9,53 @@ import { PacmanGame } from './games/PacmanGame';
 import { ChessGame } from './games/ChessGame';
 
 interface GameEngineProps {
-  game: string;
+  currentGame: string | null;
+  onGameExit: () => void;
   theme: string;
-  onExit: () => void;
 }
 
-export const GameEngine: React.FC<GameEngineProps> = ({ game, theme, onExit }) => {
+export const GameEngine: React.FC<GameEngineProps> = ({ 
+  currentGame, 
+  onGameExit, 
+  theme 
+}) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const [loadingText, setLoadingText] = useState('');
 
   useEffect(() => {
-    const loadingMessages = [
-      'Initializing game engine...',
-      'Loading graphics subsystem...',
-      'Setting up input handlers...',
-      'Allocating memory buffers...',
-      'Compiling shaders...',
-      'Loading game assets...',
-      'Initializing sound system...',
-      'Starting game loop...',
-      'Game ready!'
-    ];
+    if (currentGame) {
+      setIsLoading(true);
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentGame]);
 
-    let messageIndex = 0;
-    let progress = 0;
+  if (!currentGame) return null;
 
-    const loadingInterval = setInterval(() => {
-      if (messageIndex < loadingMessages.length) {
-        setLoadingText(loadingMessages[messageIndex]);
-        setLoadingProgress((messageIndex + 1) / loadingMessages.length * 100);
-        messageIndex++;
-      } else {
-        clearInterval(loadingInterval);
-        setTimeout(() => setIsLoading(false), 500);
-      }
-    }, 300);
-
-    return () => clearInterval(loadingInterval);
-  }, []);
+  if (isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="fixed inset-0 bg-black flex items-center justify-center z-50"
+      >
+        <div className="text-center">
+          <div className="text-2xl font-mono text-green-400 mb-4">
+            Loading {currentGame}...
+          </div>
+          <div className="w-64 h-2 bg-gray-800 rounded">
+            <motion.div
+              className="h-full bg-green-400 rounded"
+              initial={{ width: 0 }}
+              animate={{ width: '100%' }}
+              transition={{ duration: 1 }}
+            />
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
 
   const getThemeColors = () => {
     switch (theme) {
@@ -64,90 +72,30 @@ export const GameEngine: React.FC<GameEngineProps> = ({ game, theme, onExit }) =
 
   const colors = getThemeColors();
 
-  if (isLoading) {
-    return (
-      <div 
-        className="w-full h-full flex flex-col justify-center items-center"
-        style={{ backgroundColor: colors.bg, color: colors.primary }}
-      >
-        <div className="w-full max-w-2xl px-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4" style={{ color: colors.primary }}>
-              {game.toUpperCase()}
-            </h1>
-            <p className="text-lg" style={{ color: colors.secondary }}>
-              Loading retro gaming experience...
-            </p>
-          </div>
-
-          <div className="mb-6">
-            <div className="flex justify-between text-sm mb-2">
-              <span>{loadingText}</span>
-              <span>{Math.round(loadingProgress)}%</span>
-            </div>
-            <div className="w-full bg-gray-800 rounded-full h-3">
-              <motion.div
-                className="h-3 rounded-full"
-                style={{ backgroundColor: colors.primary }}
-                initial={{ width: 0 }}
-                animate={{ width: `${loadingProgress}%` }}
-                transition={{ duration: 0.3 }}
-              />
-            </div>
-          </div>
-
-          <div className="text-center text-sm" style={{ color: colors.secondary }}>
-            <p>Press ESC at any time to return to terminal</p>
-          </div>
-        </div>
-
-        {/* Loading animation */}
-        <div className="mt-8">
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="inline-block w-2 h-2 mx-1 rounded-full"
-              style={{ backgroundColor: colors.primary }}
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.5, 1, 0.5]
-              }}
-              transition={{
-                duration: 1,
-                repeat: Infinity,
-                delay: i * 0.1
-              }}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   const renderGame = () => {
-    switch (game) {
+    switch (currentGame) {
       case 'snake':
-        return <SnakeGame theme={theme} onExit={onExit} />;
+        return <SnakeGame theme={theme} onExit={onGameExit} />;
       case 'tetris':
-        return <TetrisGame theme={theme} onExit={onExit} />;
+        return <TetrisGame theme={theme} onExit={onGameExit} />;
       case 'invaders':
-        return <InvadersGame theme={theme} onExit={onExit} />;
+        return <InvadersGame theme={theme} onExit={onGameExit} />;
       case 'pong':
-        return <PongGame theme={theme} onExit={onExit} />;
+        return <PongGame theme={theme} onExit={onGameExit} />;
       case 'breakout':
-        return <BreakoutGame theme={theme} onExit={onExit} />;
+        return <BreakoutGame theme={theme} onExit={onGameExit} />;
       case 'pacman':
-        return <PacmanGame theme={theme} onExit={onExit} />;
+        return <PacmanGame theme={theme} onExit={onGameExit} />;
       case 'chess':
-        return <ChessGame theme={theme} onExit={onExit} />;
+        return <ChessGame theme={theme} onExit={onGameExit} />;
       default:
         return (
           <div className="w-full h-full flex items-center justify-center">
             <div className="text-center">
               <h1 className="text-4xl font-bold mb-4">Game Not Found</h1>
-              <p className="text-lg mb-4">The game "{game}" is not implemented yet.</p>
+              <p className="text-lg mb-4">The game "{currentGame}" is not implemented yet.</p>
               <button
-                onClick={onExit}
+                onClick={onGameExit}
                 className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 Return to Terminal

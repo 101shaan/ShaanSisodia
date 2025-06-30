@@ -35,7 +35,7 @@ const TechStack: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-20"
         >
@@ -52,13 +52,9 @@ const TechStack: React.FC = () => {
 
         {/* Tech Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {techCategories.map((category, categoryIndex) => (
-            <motion.div
+          {techCategories.map((category) => (
+            <div
               key={category.title}
-              initial={{ opacity: 0, x: categoryIndex === 0 ? -20 : 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
               className="space-y-8"
             >
               <h3 className="text-3xl font-bold text-gray-100 mb-8 text-center lg:text-left">
@@ -72,7 +68,7 @@ const TechStack: React.FC = () => {
                     key={item.name}
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: true, amount: 0.3 }}
                     transition={{ 
                       delay: index * 0.05, 
                       duration: 0.4,
@@ -83,11 +79,11 @@ const TechStack: React.FC = () => {
                       y: -3,
                       transition: { duration: 0.2, ease: "easeOut" }
                     }}
-                    className="group p-6 bg-gray-900/30 rounded-xl border border-gray-800 hover:border-cyan-500/50 transition-all duration-300 text-center"
+                    className="group p-6 bg-gray-900/30 rounded-xl border border-gray-800 hover:border-cyan-500/50 css-transition text-center"
                   >
                     <div className="flex flex-col items-center space-y-3">
                       <div 
-                        className="w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110"
+                        className="w-12 h-12 rounded-lg flex items-center justify-center css-transition group-hover:scale-110"
                         style={{ 
                           backgroundColor: `${item.color}15`,
                           border: `1px solid ${item.color}30`
@@ -96,21 +92,21 @@ const TechStack: React.FC = () => {
                         <img
                           src={item.icon}
                           alt={item.name}
-                          className="w-8 h-8 object-contain transition-all duration-300 group-hover:brightness-110"
+                          className="w-8 h-8 object-contain css-transition group-hover:brightness-110"
                           style={{ 
                             filter: item.name === 'Rust' || item.name === 'GDB' ? 'invert(1)' : 'none' 
                           }}
                           loading="lazy"
                         />
                       </div>
-                      <h4 className="text-sm font-semibold text-gray-100 group-hover:text-cyan-400 transition-colors duration-200">
+                      <h4 className="text-sm font-semibold text-gray-100 group-hover:text-cyan-400 css-transition">
                         {item.name}
                       </h4>
                     </div>
                   </motion.div>
                 ))}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

@@ -16,7 +16,6 @@ type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 export const SnakeGame: React.FC<SnakeGameProps> = ({ theme, onExit }) => {
   const [snake, setSnake] = useState<Position[]>([{ x: 10, y: 10 }]);
   const [food, setFood] = useState<Position>({ x: 15, y: 15 });
-  const [direction, setDirection] = useState<Direction>('RIGHT');
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
@@ -83,12 +82,11 @@ export const SnakeGame: React.FC<SnakeGameProps> = ({ theme, onExit }) => {
     const initialSnake = [{ x: 10, y: 10 }];
     setSnake(initialSnake);
     setFood(generateFood(initialSnake));
-    setDirection('RIGHT');
-    directionRef.current = 'RIGHT';
     setGameOver(false);
     setScore(0);
     setIsPaused(false);
     setGameStarted(true);
+    directionRef.current = 'RIGHT';
   }, [generateFood]);
 
   const moveSnake = useCallback(() => {
@@ -161,6 +159,18 @@ export const SnakeGame: React.FC<SnakeGameProps> = ({ theme, onExit }) => {
     };
   }, [moveSnake, gameStarted, gameOver, isPaused]);
 
+  // Helper function to check if direction change is valid (no 180-degree turns)
+  const isValidDirection = (newDirection: Direction): boolean => {
+    const current = directionRef.current;
+    const opposites: Record<Direction, Direction> = {
+      'UP': 'DOWN',
+      'DOWN': 'UP',
+      'LEFT': 'RIGHT',
+      'RIGHT': 'LEFT'
+    };
+    return opposites[current] !== newDirection;
+  };
+
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -183,6 +193,7 @@ export const SnakeGame: React.FC<SnakeGameProps> = ({ theme, onExit }) => {
       }
 
       if (e.key === ' ') {
+        e.preventDefault();
         setIsPaused(prev => !prev);
         return;
       }
@@ -190,33 +201,26 @@ export const SnakeGame: React.FC<SnakeGameProps> = ({ theme, onExit }) => {
       const newDirection = (() => {
         switch (e.key) {
           case 'ArrowUp':
-          case 'w':
-          case 'W':
-            return directionRef.current !== 'DOWN' ? 'UP' : directionRef.current;
+            return 'UP';
           case 'ArrowDown':
-          case 's':
-          case 'S':
-            return directionRef.current !== 'UP' ? 'DOWN' : directionRef.current;
+            return 'DOWN';
           case 'ArrowLeft':
-          case 'a':
-          case 'A':
-            return directionRef.current !== 'RIGHT' ? 'LEFT' : directionRef.current;
+            return 'LEFT';
           case 'ArrowRight':
-          case 'd':
-          case 'D':
-            return directionRef.current !== 'LEFT' ? 'RIGHT' : directionRef.current;
+            return 'RIGHT';
           default:
-            return directionRef.current;
+            return null;
         }
       })();
 
-      setDirection(newDirection);
-      directionRef.current = newDirection;
+      if (newDirection && isValidDirection(newDirection)) {
+        directionRef.current = newDirection;
+      }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [onExit, gameStarted, gameOver, resetGame]);
+  }, [onExit, gameStarted, gameOver, resetGame, isValidDirection]);
 
   return (
     <div 

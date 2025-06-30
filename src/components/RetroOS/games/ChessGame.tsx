@@ -419,9 +419,11 @@ export const ChessGame: React.FC<ChessGameProps> = ({ theme, onExit }) => {
               <h2 className="text-4xl font-bold mb-4" style={{ color: colors.primary }}>
                 GAME OVER!
               </h2>
-              <p className="text-2xl mb-6">
-                {winner?.charAt(0).toUpperCase() + winner?.slice(1)} Wins!
-              </p>
+              {winner && (
+                <div className="text-center mb-4 p-4 bg-green-500/20 border border-green-500/50 rounded">
+                  {winner.charAt(0).toUpperCase() + winner.slice(1)} Wins!
+                </div>
+              )}
               <p className="text-xl font-bold" style={{ color: colors.primary }}>
                 Press SPACE to Play Again
               </p>

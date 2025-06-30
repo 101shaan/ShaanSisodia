@@ -3,14 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Terminal } from 'lucide-react';
 import { RetroOS } from './RetroOS/RetroOS';
 
-const TerminalOverlay: React.FC = () => {
+interface TerminalOverlayProps {
+  onClose?: () => void;
+}
+
+const TerminalOverlay: React.FC<TerminalOverlayProps> = ({ onClose: _onClose }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
-  const [history, setHistory] = useState<string[]>([]);
-  const [output, setOutput] = useState<Array<{ type: 'command' | 'output' | 'error'; text: string }>>([
-    { type: 'output', text: 'Welcome to Shaan\'s Terminal v1.0' },
-    { type: 'output', text: 'Type "help" for available commands' },
-    { type: 'output', text: '' }
+  const [output, setOutput] = useState<string[]>([
+    'Welcome to ShaanOS Terminal v2.1.0',
+    'Type "help" for available commands',
+    ''
   ]);
   const [isBooting, setIsBooting] = useState(false);
   const [showRetroOS, setShowRetroOS] = useState(false);
@@ -77,10 +80,9 @@ const TerminalOverlay: React.FC = () => {
   // Improved boot sequence activation
   const bootIntoRetroOS = () => {
     setOutput(prev => [...prev,
-      { type: 'command', text: '$ hack' },
-      { type: 'output', text: '🔒 INITIATING SYSTEM BREACH...' },
-      { type: 'output', text: '🔓 ACCESS GRANTED' },
-      { type: 'output', text: '🚀 LAUNCHING RETRO OS...' },
+      '🔒 INITIATING SYSTEM BREACH...',
+      '🔓 ACCESS GRANTED',
+      '🚀 LAUNCHING RETRO OS...',
     ]);
     
     // Close this overlay and activate RetroOS immediately to avoid timing issues
@@ -106,11 +108,8 @@ const TerminalOverlay: React.FC = () => {
   const executeCommand = (cmd: string) => {
     const command = cmd.trim().toLowerCase();
     
-    // Add command to history
-    setHistory(prev => [...prev, cmd]);
-    
     // Add command to output
-    setOutput(prev => [...prev, { type: 'command', text: `$ ${cmd}` }]);
+    setOutput(prev => [...prev, `$ ${cmd}`]);
 
     // Check for boot command first
     if (command === 'hack' || command === 'hack --init-retro-os' || command === 'boot retro-os') {
@@ -122,78 +121,78 @@ const TerminalOverlay: React.FC = () => {
     switch (command) {
       case 'help':
         setOutput(prev => [...prev,
-          { type: 'output', text: 'Available commands:' },
-          { type: 'output', text: '  help     - Show this help message' },
-          { type: 'output', text: '  about    - About Shaan' },
-          { type: 'output', text: '  projects - List projects' },
-          { type: 'output', text: '  skills   - Show technical skills' },
-          { type: 'output', text: '  contact  - Contact information' },
-          { type: 'output', text: '  hack     - 🔥 Boot into ShaanOS (LEGENDARY!)' },
-          { type: 'output', text: '  clear    - Clear terminal' },
-          { type: 'output', text: '  exit     - Close terminal' },
-          { type: 'output', text: '' }
+          'Available commands:',
+          '  help     - Show this help message',
+          '  about    - About Shaan',
+          '  projects - List projects',
+          '  skills   - Show technical skills',
+          '  contact  - Contact information',
+          '  hack     - 🔥 Boot into ShaanOS (LEGENDARY!)',
+          '  clear    - Clear terminal',
+          '  exit     - Close terminal',
+          ''
         ]);
         break;
 
       case 'about':
         setOutput(prev => [...prev,
-          { type: 'output', text: 'Shaan Sisodia - Systems Developer' },
-          { type: 'output', text: '=================================' },
-          { type: 'output', text: 'Age: 14 years old' },
-          { type: 'output', text: 'Location: United Kingdom' },
-          { type: 'output', text: 'Passion: Low-level systems' },
-          { type: 'output', text: '' },
-          { type: 'output', text: 'I architect solutions from the ground up,' },
-          { type: 'output', text: 'whether it\'s operating systems in C/Assembly' },
-          { type: 'output', text: 'or full-stack web applications.' },
-          { type: 'output', text: '' }
+          'Shaan Sisodia - Systems Developer',
+          '=================================',
+          'Age: 14 years old',
+          'Location: United Kingdom',
+          'Passion: Low-level systems',
+          '',
+          'I architect solutions from the ground up,',
+          'whether it\'s operating systems in C/Assembly',
+          'or full-stack web applications.',
+          ''
         ]);
         break;
 
       case 'projects':
         setOutput(prev => [...prev,
-          { type: 'output', text: 'Featured Projects:' },
-          { type: 'output', text: '=================' },
-          { type: 'output', text: '1. ShaanOS - Custom x86 operating system kernel' },
-          { type: 'output', text: '2. CivSim - Real-time civilization simulator with AI' },
-          { type: 'output', text: '3. Daily Glitch - Full-stack mystery story platform' },
-          { type: 'output', text: '4. Ardenvale RPG - Complex text-based Dark Souls RPG' },
-          { type: 'output', text: '' },
-          { type: 'output', text: 'GitHub: https://github.com/101shaan' },
-          { type: 'output', text: '' }
+          'Featured Projects:',
+          '=================',
+          '1. ShaanOS - Custom x86 operating system kernel',
+          '2. CivSim - Real-time civilization simulator with AI',
+          '3. Daily Glitch - Full-stack mystery story platform',
+          '4. Prism Language - Fast, memory-safe systems programming language',
+          '',
+          'GitHub: https://github.com/101shaan',
+          ''
         ]);
         break;
 
       case 'skills':
         setOutput(prev => [...prev,
-          { type: 'output', text: 'Technical Arsenal:' },
-          { type: 'output', text: '=================' },
-          { type: 'output', text: 'Languages: TypeScript, Python, C++, C, Assembly, Rust' },
-          { type: 'output', text: 'Frontend: React, Next.js, TailwindCSS' },
-          { type: 'output', text: 'Backend: Node.js, PostgreSQL, Supabase' },
-          { type: 'output', text: 'Tools: Docker, Git, Linux, QEMU, GDB, Valgrind' },
-          { type: 'output', text: 'Systems: OS Development, Memory Management, Low-level' },
-          { type: 'output', text: '' }
+          'Technical Arsenal:',
+          '=================',
+          'Languages: TypeScript, Python, C++, C, Assembly, Rust',
+          'Frontend: React, Next.js, TailwindCSS',
+          'Backend: Node.js, PostgreSQL, Supabase',
+          'Tools: Docker, Git, Linux, QEMU, GDB, Valgrind',
+          'Systems: OS Development, Memory Management, Low-level',
+          ''
         ]);
         break;
 
       case 'contact':
         setOutput(prev => [...prev,
-          { type: 'output', text: 'Contact Information:' },
-          { type: 'output', text: '===================' },
-          { type: 'output', text: 'Email: shaansisodia3@gmail.com' },
-          { type: 'output', text: 'GitHub: https://github.com/101shaan' },
-          { type: 'output', text: 'LinkedIn: linkedin.com/in/shaan-sisodia-2810962ab' },
-          { type: 'output', text: '' },
-          { type: 'output', text: 'Always open to interesting projects!' },
-          { type: 'output', text: '' }
+          'Contact Information:',
+          '===================',
+          'Email: shaansisodia3@gmail.com',
+          'GitHub: https://github.com/101shaan',
+          'LinkedIn: linkedin.com/in/shaan-sisodia-2810962ab',
+          '',
+          'Always open to interesting projects!',
+          ''
         ]);
         break;
 
       case 'clear':
         setOutput([
-          { type: 'output', text: 'Terminal cleared.' },
-          { type: 'output', text: '' }
+          'Terminal cleared.',
+          ''
         ]);
         break;
 
@@ -202,15 +201,15 @@ const TerminalOverlay: React.FC = () => {
         break;
 
       case '':
-        setOutput(prev => [...prev, { type: 'output', text: '' }]);
+        setOutput(prev => [...prev, '']);
         break;
 
       default:
         setOutput(prev => [...prev,
-          { type: 'error', text: `Command not found: ${command}` },
-          { type: 'output', text: 'Type "help" for available commands.' },
-          { type: 'output', text: 'Or try "hack" to boot into ShaanOS!' },
-          { type: 'output', text: '' }
+          `Command not found: ${command}`,
+          'Type "help" for available commands.',
+          'Or try "hack" to boot into ShaanOS!',
+          ''
         ]);
     }
 
@@ -290,14 +289,16 @@ const TerminalOverlay: React.FC = () => {
                   <div
                     key={index}
                     className={`${
-                      line.type === 'command' 
+                      line.startsWith('$') 
                         ? 'text-cyan-400' 
-                        : line.type === 'error' 
+                        : line.startsWith('🔒') || line.startsWith('🔓') || line.startsWith('🚀')
+                        ? 'text-green-400' 
+                        : line.startsWith('🔥')
                         ? 'text-red-400' 
                         : 'text-gray-300'
                     }`}
                   >
-                    {line.text}
+                    {line}
                   </div>
                 ))}
               </div>

@@ -27,7 +27,7 @@ const AboutSection: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center mb-20"
         >
@@ -45,7 +45,7 @@ const AboutSection: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="space-y-8"
           >
@@ -63,7 +63,7 @@ const AboutSection: React.FC = () => {
             <motion.blockquote
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, amount: 0.3 }}
               transition={{ delay: 0.2, duration: 0.6 }}
               className="border-l-4 border-cyan-400 pl-6 py-4 bg-gray-900/50 rounded-r"
             >
@@ -74,13 +74,7 @@ const AboutSection: React.FC = () => {
           </motion.div>
 
           {/* Right side - Stats Grid */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="relative"
-          >
+          <div className="relative">
             <div className="grid grid-cols-2 gap-4">
               {[
                 { title: 'Projects Built', value: '15+', color: 'cyan' },
@@ -92,7 +86,7 @@ const AboutSection: React.FC = () => {
                   key={stat.title}
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: true, amount: 0.3 }}
                   transition={{ delay: index * 0.1, duration: 0.4 }}
                   className="p-6 bg-gray-900/50 rounded-lg border border-gray-800 text-center"
                 >
@@ -103,32 +97,26 @@ const AboutSection: React.FC = () => {
                 </motion.div>
               ))}
             </div>
-          </motion.div>
+          </div>
         </div>
 
         {/* Principles */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {principles.map((principle, index) => (
             <motion.div
               key={principle.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, amount: 0.3 }}
               transition={{ delay: index * 0.1, duration: 0.5 }}
               whileHover={{ 
                 y: -5,
                 transition: { duration: 0.2, ease: "easeOut" }
               }}
-              className="group p-8 bg-gray-900/50 rounded-lg border border-gray-800 hover:border-cyan-500/50 transition-all duration-300"
+              className="group p-8 bg-gray-900/50 rounded-lg border border-gray-800 hover:border-cyan-500/50 css-transition"
             >
               <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-lg flex items-center justify-center mr-4 group-hover:scale-105 transition-transform duration-200">
+                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-lg flex items-center justify-center mr-4 group-hover:scale-105 css-transition">
                   <principle.icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-100">{principle.title}</h3>
@@ -136,7 +124,7 @@ const AboutSection: React.FC = () => {
               <p className="text-gray-400 leading-relaxed">{principle.description}</p>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

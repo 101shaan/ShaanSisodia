@@ -47,14 +47,9 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
   const GAME_WIDTH = 800;
   const GAME_HEIGHT = 600;
   const PADDLE_WIDTH = 100;
-  const PADDLE_HEIGHT = 15;
-  const BALL_SIZE = 12;
+  const PADDLE_HEIGHT = 10;
+  const BALL_SIZE = 8;
   const PADDLE_SPEED = 8;
-  const BRICK_ROWS = 6;
-  const BRICK_COLS = 10;
-  const BRICK_WIDTH = 70;
-  const BRICK_HEIGHT = 25;
-  const BRICK_PADDING = 5;
 
   const getThemeColors = () => {
     switch (theme) {
@@ -103,28 +98,29 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
 
   const colors = getThemeColors();
 
-  const createBricks = useCallback((levelNum: number) => {
+  const createBricks = useCallback((_levelNum: number) => {
     const newBricks: Brick[] = [];
-    const startY = 50;
-    const startX = (GAME_WIDTH - (BRICK_COLS * (BRICK_WIDTH + BRICK_PADDING) - BRICK_PADDING)) / 2;
-
-    for (let row = 0; row < BRICK_ROWS; row++) {
-      for (let col = 0; col < BRICK_COLS; col++) {
-        const maxHits = Math.min(3, Math.floor(row / 2) + 1);
+    const rows = 5;
+    const cols = 10;
+    const brickWidth = GAME_WIDTH / cols;
+    const brickHeight = 20;
+    
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
         newBricks.push({
-          x: startX + col * (BRICK_WIDTH + BRICK_PADDING),
-          y: startY + row * (BRICK_HEIGHT + BRICK_PADDING),
-          width: BRICK_WIDTH,
-          height: BRICK_HEIGHT,
+          x: col * brickWidth,
+          y: 50 + row * brickHeight,
+          width: brickWidth - 2,
+          height: brickHeight - 2,
           destroyed: false,
-          hits: 0,
-          maxHits,
+          hits: Math.floor(Math.random() * 3) + 1,
+          maxHits: 3,
           color: colors.bricks[row % colors.bricks.length],
-          points: maxHits * 10
+          points: (Math.floor(Math.random() * 3) + 1) * 10
         });
       }
     }
-
+    
     return newBricks;
   }, [colors.bricks]);
 
@@ -206,7 +202,6 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
       // Ball collision with bricks
       setBricks(prevBricks => {
         const newBricks = [...prevBricks];
-        let brickHit = false;
 
         for (let i = 0; i < newBricks.length; i++) {
           const brick = newBricks[i];
@@ -217,10 +212,10 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
               newPos.y < brick.y + brick.height &&
               newPos.y + BALL_SIZE > brick.y) {
             
-            brick.hits++;
-            if (brick.hits >= brick.maxHits) {
-              brick.destroyed = true;
-              setScore(prev => prev + brick.points);
+            newBricks[i] = { ...brick, hits: brick.hits - 1 };
+            if (newBricks[i].hits <= 0) {
+              newBricks[i].destroyed = true;
+              setScore(prev => prev + newBricks[i].points);
             }
 
             const ballCenterX = newPos.x + BALL_SIZE / 2;
@@ -237,7 +232,6 @@ export const BreakoutGame: React.FC<BreakoutGameProps> = ({ theme, onExit }) => 
               setBallVel(prev => ({ ...prev, y: -prev.y }));
             }
 
-            brickHit = true;
             break;
           }
         }
