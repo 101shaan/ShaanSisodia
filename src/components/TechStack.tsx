@@ -25,6 +25,7 @@ const TechStack: React.FC = () => {
         { name: 'Valgrind', icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBzdHJva2U9IiNGRjZCMzUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=', color: '#FF6B35' },
         { name: 'QEMU', icon: 'https://cdn.simpleicons.org/qemu', color: '#FF6600' },
         { name: 'Vim', icon: 'https://cdn.simpleicons.org/vim', color: '#019733' },
+        { name: 'LLVM', icon: 'https://cdn.simpleicons.org/llvm', color: '#FF6600' },
       ]
     }
   ];
