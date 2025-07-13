@@ -92,7 +92,7 @@ project/
 - **ShaanOS** — Custom x86 OS ([repo](https://github.com/101shaan/ShaanOS))
 - **CivSim** — Civilization simulator ([repo](https://github.com/101shaan/CIVSIM))
 - **Daily Glitch** — Mystery story platform ([repo](https://github.com/101shaan/DailyGlitch))
-- **Prism Language** — Fast, memory-safe systems programming language ([repo](https://github.com/101shaan/Prism))
+- **Bract Language** — Fast, memory-safe systems programming language ([repo](https://github.com/101shaan/Bract))
 
 ---
 

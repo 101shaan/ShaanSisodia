@@ -318,9 +318,9 @@ export class CommandProcessor {
         { type: 'output', text: '   📁 /projects/civsim' },
         { type: 'output', text: '3. Daily Glitch - Mystery Story Platform' },
         { type: 'output', text: '   📁 /projects/dailyglitch' },
-        { type: 'output', text: '4. Prism Language - Systems Programming Language' },
-        { type: 'output', text: '   📁 /projects/prism' },
-        { type: 'output', text: '   🔗 https://github.com/101shaan/Prism' },
+        { type: 'output', text: '4. Bract Language - Systems Programming Language' },
+        { type: 'output', text: '   📁 /projects/bract' },
+        { type: 'output', text: '   🔗 https://github.com/101shaan/Bract' },
         { type: 'output', text: '' },
         { type: 'output', text: 'Use "cd /projects/<name>" to explore each project!' }
       ]

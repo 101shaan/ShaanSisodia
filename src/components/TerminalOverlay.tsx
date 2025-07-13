@@ -156,7 +156,7 @@ const TerminalOverlay: React.FC<TerminalOverlayProps> = ({ onClose: _onClose }) 
           '1. ShaanOS - Custom x86 operating system kernel',
           '2. CivSim - Real-time civilization simulator with AI',
           '3. Daily Glitch - Full-stack mystery story platform',
-          '4. Prism Language - Fast, memory-safe systems programming language',
+          '4. Bract Language - Fast, memory-safe systems programming language',
           '',
           'GitHub: https://github.com/101shaan',
           ''

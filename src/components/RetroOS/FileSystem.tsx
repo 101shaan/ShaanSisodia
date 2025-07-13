@@ -58,7 +58,7 @@ I hope you enjoy my portfolio / OS.
 - /projects/shaanos: Custom operating system
 - /projects/civsim: Civilization simulator
 - /projects/dailyglitch: Mystery story platform
-- /projects/prism: Systems programming language
+- /projects/bract: Systems programming language
 
 Enjoy exploring!`
                 },
@@ -265,8 +265,8 @@ Explore the unexplained, one glitch at a time.`
                 }
               }
             },
-            'prism': {
-              name: 'prism',
+            'bract': {
+              name: 'bract',
               type: 'directory',
               permissions: 'drwxr-xr-x',
               modified: new Date(),
@@ -277,7 +277,7 @@ Explore the unexplained, one glitch at a time.`
                   permissions: '-rw-r--r--',
                   size: 1792,
                   modified: new Date(),
-                  content: `# Prism Language - Fast, Memory-Safe Systems Programming
+                  content: `# Bract Language - Fast, Memory-Safe Systems Programming
 
 A blazingly fast, memory-safe systems programming language that compiles to native machine code.
 
@@ -306,7 +306,7 @@ A blazingly fast, memory-safe systems programming language that compiles to nati
 - Fast by default, safe by default, clear by default
 
 ## GitHub:
-https://github.com/101shaan/Prism
+https://github.com/101shaan/Bract
 
 "Refract complexity into clarity" ✨`
                 }

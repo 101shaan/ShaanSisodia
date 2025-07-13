@@ -50,13 +50,13 @@ const ProjectsSection: React.FC = () => {
       status: 'completed'
     },
     {
-      id: 'prism',
-      title: 'Prism Language',
+      id: 'bract',
+      title: 'Bract Language',
       description: 'A blazingly fast, memory-safe systems programming language that compiles to native machine code',
-      longDescription: 'Prism is a modern systems programming language designed for speed, safety, and clarity. It combines the performance of C/Rust with the expressiveness of modern languages, featuring lightning-fast compilation to native machine code, memory safety without garbage collection, powerful type inference, built-in package management, and zero-cost abstractions. Currently in early development with lexer, parser, and type system foundations being implemented.',
-      tech: ['Rust', 'LLVM', 'Systems Programming', 'Compiler Design', 'Language Theory'],
-      image: '/Prism.png',
-      github: 'https://github.com/101shaan/Prism',
+      longDescription: 'Bract is a modern systems programming language designed for speed, safety, and clarity. It combines the performance of C/Rust with the expressiveness of modern languages, featuring lightning-fast compilation to native machine code, memory safety without garbage collection, powerful type inference, built-in package management, and zero-cost abstractions. Currently in early development with lexer, parser, and type system foundations being implemented.',
+      tech: ['Rust', 'Cranelift', 'Systems Programming', 'Compiler Design', 'Language Theory'],
+      image: '/Bract.png',
+      github: 'https://github.com/101shaan/Bract',
       status: 'in-progress'
     }
   ];
